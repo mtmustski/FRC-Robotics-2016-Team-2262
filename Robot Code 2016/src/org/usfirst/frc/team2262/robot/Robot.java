@@ -5,6 +5,8 @@ import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.RobotDrive;
 import edu.wpi.first.wpilibj.livewindow.LiveWindow;
 import edu.wpi.first.wpilibj.CameraServer;
+import edu.wpi.first.wpilibj.Ultrasonic;
+
 
 /**
  * The VM is configured to automatically run this class, and to call the
@@ -19,6 +21,10 @@ public class Robot extends IterativeRobot {
 	int autoLoopCounter;
 	CameraServer server; 
 	
+	//defining xbox 360 controller
+	Joystick xboxControler = new Joystick(1); //joystick 1 = left x axis
+	
+	
     /**
      * This function is run when the robot is first started up and should be
      * used for any initialization code.
@@ -30,6 +36,9 @@ public class Robot extends IterativeRobot {
         server.setQuality(50);
         //the camera name (ex "cam0") can be found through the roborio web interface
         server.startAutomaticCapture("cam0");
+        
+        
+        
     }
     
     /**
