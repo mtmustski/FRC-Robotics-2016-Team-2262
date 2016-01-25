@@ -1,0 +1,21 @@
+Axis indexes:
+1 - LeftX
+2 - LeftY
+3 - Triggers (Each trigger = 0 to 1, axis value = right - left)
+4 - RightX
+5 - RightY
+6 - DPad Left/Right
+
+Button mapping matches Windows Control Panel>Game Pads display
+So you define the Joystick like:
+
+Code:
+Joystick mXboxController = new Joystick(1); // Where "1" is the index of the joystick (you can set this in the Driver Station software).
+To read an axis (like the left stick Y axis), simply do:
+
+Code:
+double axisValue = mXboxController.getRawAxis(2); // Where "2" is the index of the Y axis on the left stick (see above)
+To read a button, simply do:
+
+Code:
+boolean buttonPressed = mXboxController.getRawButton(1); // Where "1" is the index of the button reported by the Windows Control Panel "Game Controllers" display
