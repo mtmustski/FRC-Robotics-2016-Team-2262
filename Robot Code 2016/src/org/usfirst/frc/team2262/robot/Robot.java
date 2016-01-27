@@ -5,7 +5,7 @@ import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.RobotDrive;
 import edu.wpi.first.wpilibj.livewindow.LiveWindow;
 import edu.wpi.first.wpilibj.CameraServer;
-import edu.wpi.first.wpilibj.Ultrasonic;
+//mport edu.wpi.first.wpilibj.Ultrasonic;
 
 
 /**
@@ -17,12 +17,18 @@ import edu.wpi.first.wpilibj.Ultrasonic;
  */
 public class Robot extends IterativeRobot {
 	RobotDrive myRobot;
-	Joystick stick;
+	
 	int autoLoopCounter;
+	
+	//adding camera 
 	CameraServer server; 
 	
+	//defining joysticks
+	Joystick stickLeft;
+	Joystick stickRight;
+	
 	//defining xbox 360 controller
-	Joystick xboxControler = new Joystick(1); //joystick 1 = left x axis
+	Joystick xboxControler;
 	
 	
     /**
@@ -31,7 +37,14 @@ public class Robot extends IterativeRobot {
      */
     public void robotInit() {
     	myRobot = new RobotDrive(0,1);
-    	stick = new Joystick(0);
+    	
+    	//creating new instance of xboxController
+    	xboxControler = new Joystick(1); //joystick 1 = left x axis
+    	
+    	//creating new instance of joystick Left
+    	stickLeft = new Joystick(0);
+    	
+    	//camera 
     	server = CameraServer.getInstance();
         server.setQuality(50);
         //the camera name (ex "cam0") can be found through the roborio web interface
@@ -71,7 +84,7 @@ public class Robot extends IterativeRobot {
      * This function is called periodically during operator control
      */
     public void teleopPeriodic() {
-        myRobot.arcadeDrive(stick);
+        myRobot.arcadeDrive(stickLeft);
     }
     
     /**
