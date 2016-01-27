@@ -3,9 +3,10 @@ package org.usfirst.frc.team2262.robot;
 import edu.wpi.first.wpilibj.IterativeRobot;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.RobotDrive;
+import edu.wpi.first.wpilibj.RobotDrive.MotorType;
 import edu.wpi.first.wpilibj.livewindow.LiveWindow;
 import edu.wpi.first.wpilibj.CameraServer;
-//mport edu.wpi.first.wpilibj.Ultrasonic;
+//import edu.wpi.first.wpilibj.Ultrasonic;
 
 
 /**
@@ -19,7 +20,7 @@ public class Robot extends IterativeRobot {
 	RobotDrive myRobot;
 	
 	int autoLoopCounter;
-	
+
 	//adding camera 
 	CameraServer server; 
 	
