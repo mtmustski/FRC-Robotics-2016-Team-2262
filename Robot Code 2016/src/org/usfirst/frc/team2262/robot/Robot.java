@@ -3,9 +3,13 @@ package org.usfirst.frc.team2262.robot;
 import edu.wpi.first.wpilibj.IterativeRobot;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.RobotDrive;
+import edu.wpi.first.wpilibj.TalonSRX;
+import edu.wpi.first.wpilibj.Victor;
 import edu.wpi.first.wpilibj.livewindow.LiveWindow;
 import edu.wpi.first.wpilibj.CameraServer;
-//import edu.wpi.first.wpilibj.Ultrasonic;
+import edu.wpi.first.wpilibj.Encoder;
+import edu.wpi.first.wpilibj.Ultrasonic;
+
 
 
 /**
@@ -17,6 +21,25 @@ import edu.wpi.first.wpilibj.CameraServer;
  */
 public class Robot extends IterativeRobot {
 	RobotDrive myRobot;
+	
+	//adding CAN Talons for drive motors
+	DriveMotor leftDrive;
+	DriveMotor rightDrive;
+	
+	
+	//adding victors for arm
+	Victor elbow; 
+	Victor armRoller;
+	
+	//adding victors for Tape Measure
+	Victor tapeRoller;
+	Victor frontClimber;
+	Victor backClimber; 
+	
+	//adding automous sensors
+	Encoder leftEncoder;
+	Encoder rightEncoder;
+	Ultrasonic ultrasonic;
 	
 	int autoLoopCounter;
 	
@@ -49,7 +72,10 @@ public class Robot extends IterativeRobot {
         server.setQuality(50);
         //the camera name (ex "cam0") can be found through the roborio web interface
         server.startAutomaticCapture("cam0");
-        
+     
+        //Initialize drive motors 
+        leftDrive = new DriveMotor(0, 1);
+        rightDrive = new DriveMotor(2, 3);
         
         
     }
@@ -78,13 +104,18 @@ public class Robot extends IterativeRobot {
      * This function is called once each time the robot enters tele-operated mode
      */
     public void teleopInit(){
+    	
+    	leftDrive.stop();
+    	rightDrive.stop();
     }
 
     /**
      * This function is called periodically during operator control
      */
     public void teleopPeriodic() {
-        myRobot.arcadeDrive(stickLeft);
+       // myRobot.arcadeDrive(stickLeft);
+    	//myRobot.arcadeDrive(moveStick, moveAxis, rotateStick, rotateAxis);
+    	
     }
     
     /**
