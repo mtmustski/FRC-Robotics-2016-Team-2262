@@ -21,9 +21,15 @@ public class Robot extends IterativeRobot {
 	RobotDrive myRobot;
 	
 	//adding CAN Talons for drive motors
-	DriveMotor leftDrive;
-	DriveMotor rightDrive;
 	
+	/*driveMotorClass = new DriveMotor(front, back);
+	DriveMotor leftDrive;
+	DriveMotor rightDrive;*/
+	
+	TalonSRX frontLeft;
+	TalonSRX rearLeft;
+	TalonSRX frontRight;
+	TalonSRX rearRight;
 	
 	//adding victors for arm
 	Victor elbow; 
@@ -49,7 +55,7 @@ public class Robot extends IterativeRobot {
 	Joystick stickRight;
 	
 	//defining xbox 360 controller
-	Joystick xboxControler;
+	Joystick xboxController;
 	
 	
     /**
@@ -57,10 +63,9 @@ public class Robot extends IterativeRobot {
      * used for any initialization code.
      */
     public void robotInit() {
-    	myRobot = new RobotDrive(0,1);
     	
     	//creating new instance of xboxController
-    	xboxControler = new Joystick(1); //joystick 1 = left x axis
+    	xboxController = new Joystick(1);
     	
     	//creating new instance of joystick Left
     	stickLeft = new Joystick(0);
@@ -72,8 +77,17 @@ public class Robot extends IterativeRobot {
         server.startAutomaticCapture("cam0");
      
         //Initialize drive motors 
-        leftDrive = new DriveMotor(0, 1);
-        rightDrive = new DriveMotor(2, 3);
+        
+        /*leftDrive = new DriveMotor(0, 1);
+        rightDrive = new DriveMotor(2, 3);*/
+        
+        frontLeft = new TalonSRX(0);
+        rearLeft = new TalonSRX(1);
+        frontRight = new TalonSRX(2);
+        rearRight = new TalonSRX(3);
+        
+        //Initialize RobotDrive
+        myRobot = new RobotDrive (frontLeft, rearLeft, frontRight, rearRight);
         
         
     }
@@ -103,8 +117,9 @@ public class Robot extends IterativeRobot {
      */
     public void teleopInit(){
     	
-    	leftDrive.stop();
-    	rightDrive.stop();
+    	/*leftDrive.stop();
+    	rightDrive.stop();*/
+    	
     }
 
     /**
@@ -113,6 +128,7 @@ public class Robot extends IterativeRobot {
     public void teleopPeriodic() {
        // myRobot.arcadeDrive(stickLeft);
     	//myRobot.arcadeDrive(moveStick, moveAxis, rotateStick, rotateAxis);
+    	myRobot.arcadeDrive(xboxController, 5, xboxController, 1);
     	
     }
     
