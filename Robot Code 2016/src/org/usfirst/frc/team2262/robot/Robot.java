@@ -4,11 +4,12 @@ import edu.wpi.first.wpilibj.IterativeRobot;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.RobotDrive;
 import edu.wpi.first.wpilibj.TalonSRX;
-import edu.wpi.first.wpilibj.Victor;
+import edu.wpi.first.wpilibj.Talon;
 import edu.wpi.first.wpilibj.livewindow.LiveWindow;
 import edu.wpi.first.wpilibj.CameraServer;
 import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.Ultrasonic;
+import edu.wpi.first.wpilibj.DigitalInput;
 
 /**
  * The VM is configured to automatically run this class, and to call the
@@ -32,43 +33,48 @@ public class Robot extends IterativeRobot {
 	TalonSRX rearRight;
 	
 	//adding victors for arm
-	Victor elbow; 
-	Victor armRoller;
+	Talon elbow; 
+	Talon armRoller;
 	
 	//adding victors for Tape Measure
-	Victor tapeRoller;
-	Victor frontClimber;
-	Victor backClimber; 
+	Talon tapeRoller;
+	Talon frontClimber;
+	Talon backClimber; 
 	
-	//adding automous sensors
+	//adding sensors
 	Encoder leftEncoder;
 	Encoder rightEncoder;
+	
 	Ultrasonic ultrasonic;
+	
+	DigitalInput limitSwitchTop;
+	DigitalInput limitSwitchBottom;
 	
 	int autoLoopCounter;
 	
 	//adding camera 
 	CameraServer server; 
 	
-	//defining joysticks
-	Joystick stickLeft;
-	Joystick stickRight;
+	//adding joystick
+	Joystick joystick;
 	
-	//defining xbox 360 controller
+	//adding xbox 360 controller
 	Joystick xboxController;
 	
-	
+	//adding arm class
+	Arm arm;
+		
     /**
      * This function is run when the robot is first started up and should be
      * used for any initialization code.
-     */
+     */	
     public void robotInit() {
     	
     	//creating new instance of xboxController
     	xboxController = new Joystick(1);
     	
-    	//creating new instance of joystick Left
-    	stickLeft = new Joystick(0);
+    	//creating new instance of joystick
+    	joystick = new Joystick(0);
     	
     	//camera 
     	server = CameraServer.getInstance();
@@ -76,7 +82,7 @@ public class Robot extends IterativeRobot {
         //the camera name (ex "cam0") can be found through the roborio web interface
         server.startAutomaticCapture("cam0");
      
-        //Initialize drive motors 
+        //initializing drive motors 
         
         /*leftDrive = new DriveMotor(0, 1);
         rightDrive = new DriveMotor(2, 3);*/
@@ -86,9 +92,15 @@ public class Robot extends IterativeRobot {
         frontRight = new TalonSRX(2);
         rearRight = new TalonSRX(3);
         
-        //Initialize RobotDrive
+        //initializing RobotDrive
         myRobot = new RobotDrive (frontLeft, rearLeft, frontRight, rearRight);
         
+       /* //initializing arm motors
+        elbow = new Talon(0);
+        armRoller = new Talon(1); */
+        
+        //initializing arm class
+        arm = new Arm(0, 1, 8, 9);    
         
     }
     
@@ -97,6 +109,7 @@ public class Robot extends IterativeRobot {
      */
     public void autonomousInit() {
     	autoLoopCounter = 0;
+    	
     }
 
     /**
@@ -110,6 +123,7 @@ public class Robot extends IterativeRobot {
 			} else {
 			myRobot.drive(0.0, 0.0); 	// stop robot
 		}
+    	
     }
     
     /**
@@ -118,7 +132,7 @@ public class Robot extends IterativeRobot {
     public void teleopInit(){
     	
     	/*leftDrive.stop();
-    	rightDrive.stop();*/
+    	rightDrive.stop();*/  
     	
     }
 
@@ -126,9 +140,11 @@ public class Robot extends IterativeRobot {
      * This function is called periodically during operator control
      */
     public void teleopPeriodic() {
-       // myRobot.arcadeDrive(stickLeft);
-    	//myRobot.arcadeDrive(moveStick, moveAxis, rotateStick, rotateAxis);
+    	//drive
     	myRobot.arcadeDrive(xboxController, 5, xboxController, 1);
+    	
+    	//arm
+    	arm.elbowMotion (xboxController.getRawButton(6), xboxController.getRawButton(5));
     	
     }
     
@@ -137,6 +153,7 @@ public class Robot extends IterativeRobot {
      */
     public void testPeriodic() {
     	LiveWindow.run();
+    	
     }
     
 }

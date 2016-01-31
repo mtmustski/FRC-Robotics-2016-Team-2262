@@ -1,0 +1,584 @@
+package org.usfirst.frc.team2262.robot;
+
+import edu.wpi.first.wpilibj.IterativeRobot;
+import edu.wpi.first.wpilibj.Joystick;
+import edu.wpi.first.wpilibj.Talon;
+import edu.wpi.first.wpilibj.Victor;
+import edu.wpi.first.wpilibj.Encoder;
+import edu.wpi.first.wpilibj.DigitalInput;
+import edu.wpi.first.wpilibj.DigitalOutput;
+import edu.wpi.first.wpilibj.Gyro;
+import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.smartdashboard.*;
+import edu.wpi.first.wpilibj.DriverStation;
+
+//import edu.wpi.first.wpilibj.buttons.Button;
+//import edu.wpi.first.wpilibj.buttons.JoystickButton;
+//import edu.wpi.first.wpilibj.Joystick.AxisType;
+
+/**
+ * The VM is configured to automatically run this class, and to call the
+ * functions corresponding to each mode, as described in the IterativeRobot
+ * documentation. If you change the name of this class or the package after
+ * creating this project, you must also update the manifest file in the resource
+ * directory.
+ */
+public class Robot extends IterativeRobot {	
+	//declare pid controllers and their variables:
+	boolean pidEnabled=false;
+	PIDController PIDFrontLeft;
+	PIDController PIDFrontRight;
+	PIDController PIDRearLeft;
+	PIDController PIDRearRight;
+	
+	//PIDController PIDLift;
+	//PIDController PIDArm;
+	
+	double kpDrive=0.122;
+	double kiDrive=0.007;
+	double kdDrive=0;
+	
+	/*double kpLift=0;
+	double kiLift=0;
+	double kdLift=0;
+	double kpArm=0;
+	double kiArm=0;
+	double kdArm=0;*/
+	
+	double kVoltage=1.6;	//inc kVoltage: dec sensitivity & inc direction accuracy
+							//dec kVoltage: inc sensitivity & dec direction accuracy
+	
+	double outputToEscFL=0;
+	double outputToEscFR=0;
+	double outputToEscRL=0;
+	double outputToEscRR=0;
+	double maxRateOfChange=.01;//time delay between full back and full forward: .01=4seconds   .015=3seconds   .02=2seconds
+	
+	//declare joysticks and their variables:
+	Joystick stickDrive;
+	Joystick stickForklift;
+	
+	//declare speed controllers and their variables:
+	Talon talonFrontLeft;
+	Talon talonFrontRight;
+	Talon talonRearLeft;
+	Talon talonRearRight;
+	Talon talonArm;
+	Talon talonLift;
+	Victor victorShooter;
+	double shooterMaxSpeed=1;
+	
+	boolean upflag=false;
+	boolean downflag=false;
+	boolean nudge=false;
+	double nudgeValue=200;
+	double goal=0;
+	
+	//declare encoders and their variables:
+	Encoder encoderFrontLeft;
+	Encoder encoderFrontRight;
+	Encoder encoderRearLeft;
+	Encoder encoderRearRight;
+	Encoder encoderArm;
+	Encoder encoderLift;
+	double driveTopSpeed=4.4;//4.4 revolutions per second top speed measured with no load
+	double armRange=3359;//this may need to be updated
+	double liftRange=832*2;//this needs to be updated
+	
+	double innerBuffer=25;//one twentyfifth of the range is the size of the buffer for going slow on both extremes so we don't blow by a limit switch
+	double innerBufferArmMax=armRange-(armRange/innerBuffer);
+	double innerBufferArmMin=armRange/innerBuffer;
+	double innerBufferLiftMax=liftRange-(liftRange/innerBuffer);
+	double innerBufferLiftMin=liftRange/innerBuffer;
+	double innerBufferZoneSpeed=.5;
+	
+	double outerBuffer=10;//one tenth of the range is the size of the buffer for going slow on both extremes so we don't blow by a limit switch
+	double outerBufferArmMax=armRange-(armRange/outerBuffer);
+	double outerBufferArmMin=armRange/outerBuffer;
+	double outerBufferLiftMax=liftRange-(liftRange/outerBuffer);
+	double outerBufferLiftMin=liftRange/outerBuffer;
+	double outerBufferZoneSpeed=.2;
+	
+	int samplesToAverage=127;//RANGE:1-127
+	double frontLeftSpeed=0;
+	double frontRightSpeed=0;
+	double rearLeftSpeed=0;
+	double rearRightSpeed=0;
+	
+	//declare smartdashboard
+	SmartDashboard smartDashboard; 
+
+	//declare limit switches:
+	DigitalInput limitSwitchIn;
+	DigitalInput limitSwitchOut;
+	DigitalInput limitSwitchDown;
+	DigitalInput limitSwitchUp;
+	
+	//declare gyro and its variables:
+	Gyro gyro;
+	double Kp=0.03;
+	double angle=0;
+	double angleOffset=0;
+
+	//declare timer and its variables:
+	Timer timer;
+	double timeAutoInit=0;
+	double timeAutoFinal=0;
+	double timeInitial=0;
+	double timeFinal=0;
+	boolean clock=true;
+	
+	DigitalOutput lightsRedBlue;
+	DigitalOutput lightsDance;
+	DigitalOutput lightsGreen;
+
+	//use this function to map values from one range to another:
+	double mapRange(double s, double a1, double a2, double b1, double b2){
+		return b1 + ((s - a1)*(b2 - b1))/(a2 - a1);
+	}//end mapRange()
+	
+	double getGyroAngle(){return gyro.getAngle()+angleOffset;}
+	void resetGyro(double a){a=angleOffset;gyro.reset();}
+	
+	//use as parameter for drive function:
+    double getJoystickMagnitude(){
+        double jX = stickDrive.getX();
+        double jY = -stickDrive.getY();
+        double mag = Math.abs(Math.sqrt(Math.pow(jX, 2) + Math.pow(jY, 2))); 
+        //if(Math.abs(mag)<.15){mag=0;}//this makes a dead zone in the center
+        return mag;
+    }//end getJoystickMagnitude()
+    
+    //use as parameter for drive function:
+    double getJoystickDirection(){
+        double jX = stickDrive.getX();
+        double jY = -stickDrive.getY();
+        double mainStickDirection = (Math.toDegrees(Math.atan(Math.abs(jY/jX))));
+        if(jX==0) {
+        	if (jY>0){mainStickDirection = 0;}
+            if (jY<0){mainStickDirection = 180;} 
+        }else{
+        	if(jX<0) {
+        		if(jY<0) {mainStickDirection = 270 - mainStickDirection;}
+        		else if(jY>0) {mainStickDirection = 270 + mainStickDirection;}
+        		else {mainStickDirection = 270;}
+        	}else {
+        		if(jY<0) {mainStickDirection = 90 + mainStickDirection;}
+        		else if(jY==0) {mainStickDirection = 90;}
+        		else {mainStickDirection = 90 - mainStickDirection;}
+        	}
+        }
+        //This sets dead zones near 4 major axis, + half's sensitivity in general:
+        //if(mainStickDirection > 350 | mainStickDirection < 10) {mainStickDirection = 0;} 
+		//else if(mainStickDirection > 170 && mainStickDirection < 190) {mainStickDirection = 180;} 
+		//else if(mainStickDirection > 80 && mainStickDirection < 100) {mainStickDirection = 90;} 
+		//else if(mainStickDirection > 260 && mainStickDirection < 280) {mainStickDirection = 270;}
+        
+        //if(mainStickDirection % 2 == 1) {mainStickDirection -= 1;}
+        return mainStickDirection;
+    }//end getJoystickDirection()
+	
+    //called from fod(), called from drive():
+    double normAngle(double angle){
+        angle = angle % 360;
+        if (angle<0) {angle += 360;}
+        return angle;
+    }//end normAngle()
+    
+    //(field oriented drive) called from drive():
+    double fod(double mainStickDirection){
+        double desiredAngle;
+        double gyroAngle = normAngle(getGyroAngle());
+        double errorAngle = 10;
+        if(mainStickDirection - gyroAngle < errorAngle && mainStickDirection - gyroAngle > -errorAngle) {desiredAngle = gyroAngle;} 
+		else {desiredAngle = mainStickDirection - gyroAngle;}
+        if(desiredAngle  < 0) {desiredAngle +=360;}
+        desiredAngle = Math.toRadians(desiredAngle);
+        return desiredAngle;
+    }//end fod()
+    
+    
+    
+    //update drive:
+    void drive(double desiredSpeed, double desiredAngle, double turnSpeed, boolean fod){ //0-1,0-2pi (radians), 0-1   
+        if(fod == true) {desiredAngle = fod(desiredAngle);} //adjust desired angle when using field oriented drive
+        else {desiredAngle = Math.toRadians(desiredAngle);}
+        double frontLeft;
+        double frontRight;
+        double rearLeft;
+        double rearRight;
+        frontLeft = ((desiredSpeed*(Math.sin(desiredAngle + Math.PI/4)))+ turnSpeed);
+        frontRight = ((desiredSpeed*(Math.cos(desiredAngle + Math.PI/4)))- turnSpeed);
+        rearLeft = ((desiredSpeed*(Math.cos(desiredAngle + Math.PI/4)))+ turnSpeed);
+        rearRight = ((desiredSpeed*(Math.sin(desiredAngle + Math.PI/4)))- turnSpeed);
+        double scaleFactor = Math.max(Math.max(Math.max(Math.abs(frontLeft),Math.abs(frontRight)),Math.abs(rearLeft)),Math.abs(rearRight));
+        if(scaleFactor>1){
+        	frontLeft=frontLeft/scaleFactor;
+        	frontRight=frontRight/scaleFactor;
+            rearLeft=rearLeft/scaleFactor;
+            rearRight=rearRight/scaleFactor;
+        }//end if
+        
+      //code for driving without controllers:   
+       /* outputToEscFL=lowPassFilter(outputToEscFL, frontLeft);
+    	outputToEscFR=lowPassFilter(outputToEscFR, -frontRight);
+    	outputToEscRL=lowPassFilter(outputToEscRL, rearLeft);
+    	outputToEscRR=lowPassFilter(outputToEscRR, -rearRight);
+    	
+        talonFrontLeft.set(outputToEscFL);
+        talonFrontRight.set(outputToEscFR);
+        talonRearLeft.set(outputToEscRL);
+        talonRearRight.set(outputToEscRR);*/
+        
+	    //output to speed controller
+        //the actual speed of the wheel is not directly related to the voltage provided to that wheel
+        //so we need to account for this difference here:
+        if (pidEnabled){
+        	outputToEscFL=lowPassFilter(outputToEscFL, PIDFrontLeft.getOutput(frontLeft*driveTopSpeed, frontLeftSpeed));
+        	outputToEscFR=lowPassFilter(outputToEscFR, PIDFrontRight.getOutput(frontRight*driveTopSpeed, frontRightSpeed));
+        	outputToEscRL=lowPassFilter(outputToEscRL, PIDRearLeft.getOutput(rearLeft*driveTopSpeed, rearLeftSpeed));
+        	outputToEscRR=lowPassFilter(outputToEscRR, PIDRearRight.getOutput(rearRight*driveTopSpeed, rearRightSpeed));
+        }else{
+        	outputToEscFL=lowPassFilter(outputToEscFL, encoderController(frontLeft*driveTopSpeed, frontLeftSpeed, frontLeft));
+        	outputToEscFR=lowPassFilter(outputToEscFR, encoderController(-frontRight*driveTopSpeed, frontRightSpeed, -frontRight));
+        	outputToEscRL=lowPassFilter(outputToEscRL, encoderController(rearLeft*driveTopSpeed, rearLeftSpeed, rearLeft));
+        	outputToEscRR=lowPassFilter(outputToEscRR, encoderController(-rearRight*driveTopSpeed, rearRightSpeed, -rearRight));
+        }
+        talonFrontLeft.set(outputToEscFL);
+    	talonFrontRight.set(outputToEscFR);
+    	talonRearLeft.set(outputToEscRL);
+    	talonRearRight.set(outputToEscRR);
+    }//end drive()
+    
+    //set all wheels to speed specified:
+    void turnWheelsTest(double speed){
+        talonFrontLeft.set(speed);
+        talonFrontRight.set(-speed);
+        talonRearLeft.set(speed);
+        talonRearRight.set(-speed);
+    }//end turnWheelsTest()
+
+	//update arm and lift:
+	void forklift(double liftSpeed, boolean up, boolean down, boolean in, boolean out){
+	    //update lift:
+		/*if(!up){upflag=false;}
+		if(up && (upflag==false)){
+			upflag=true;
+			if(nudge==false){goal=encoderLift.get()+nudgeValue; nudge=true;}
+			else {goal = goal + nudgeValue;}
+		}
+		
+		if(!down){downflag=false;}
+		if(down && (downflag==false)){
+			downflag=true;
+			if(nudge==false){goal=encoderLift.get()-nudgeValue; nudge=true;}
+			else {goal = goal - nudgeValue;}
+		}
+		
+		if (Math.abs(liftSpeed)<.15) {nudge=false;}
+		else {
+			if(goal>encoderLift.get()){
+				if (goal<encoderLift.get()+10){nudge=false;}
+				else{liftSpeed=1;}
+			}
+			if(goal<encoderLift.get()){
+				if (goal>encoderLift.get()-10){nudge=false;}
+				else{liftSpeed=-1;}
+			}
+		}
+		
+		if(nudge){
+			if(goal>encoderLift.get()){liftSpeed=.75;}
+			if(goal<encoderLift.get()){liftSpeed=-.75;}
+		}
+		
+		if ((liftSpeed<-innerBufferZoneSpeed)&&(encoderLift.getDistance()<innerBufferLiftMin)){liftSpeed=-innerBufferZoneSpeed;}//slow down in buffer zone
+		if ((liftSpeed>innerBufferZoneSpeed)&&(encoderLift.getDistance()<innerBufferLiftMax)){liftSpeed=innerBufferZoneSpeed;}//slow down in buffer zone
+		if ((liftSpeed<-outerBufferZoneSpeed)&&(encoderLift.getDistance()<outerBufferLiftMin)){liftSpeed=-outerBufferZoneSpeed;}//slow down in buffer zone
+		if ((liftSpeed>outerBufferZoneSpeed)&&(encoderLift.getDistance()<outerBufferLiftMax)){liftSpeed=outerBufferZoneSpeed;}//slow down in buffer zone*/
+		//if ((liftSpeed<0)&&(limitSwitchDown.get())){liftSpeed=0;}//stop if limit switch is tripped
+		//if ((liftSpeed>0)&&(limitSwitchUp.get())){liftSpeed=0;}//stop if limit switch is tripped
+		talonLift.set(liftSpeed);
+		
+		//update arm:
+		double armSpeed;
+		if(in){armSpeed=0.3;}
+		else if(out){armSpeed=-0.3;}
+		else {armSpeed=0;}
+		/*if ((armSpeed<-innerBufferZoneSpeed)&&(encoderArm.getDistance()<innerBufferArmMin)){armSpeed=-innerBufferZoneSpeed;}//slow down in buffer zone
+		if ((armSpeed>innerBufferZoneSpeed)&&(encoderArm.getDistance()<innerBufferArmMax)){armSpeed=innerBufferZoneSpeed;}//slow down in buffer zone
+		if ((armSpeed<-outerBufferZoneSpeed)&&(encoderArm.getDistance()<outerBufferArmMin)){armSpeed=-outerBufferZoneSpeed;}//slow down in buffer zone
+		if ((armSpeed>outerBufferZoneSpeed)&&(encoderArm.getDistance()<outerBufferArmMax)){armSpeed=outerBufferZoneSpeed;}//slow down in buffer zone*/
+		//if ((armSpeed>0)&&(limitSwitchIn.get())){armSpeed=0;}//stop if limit switch is tripped
+		//if ((armSpeed<0)&&(limitSwitchOut.get())){armSpeed=0;}//stop if limit switch is tripped
+		
+		talonArm.set(armSpeed);	
+	}//end forklift
+	
+	//This function is run when the robot is first started up and should be used for any initialization code:
+	public void robotInit() {
+		//initialize PIDControllers
+		PIDFrontLeft = new PIDController(kpDrive, kiDrive, kdDrive);
+		PIDFrontRight = new PIDController(kpDrive, kiDrive, kdDrive);
+		PIDRearLeft = new PIDController(kpDrive, kiDrive, kdDrive);
+		PIDRearRight = new PIDController(kpDrive, kiDrive, kdDrive);
+		//PIDLift = new PIDController(kpLift, kiLift, kdLift);
+		//PIDArm = new PIDController(kpArm, kiArm, kdArm);
+		
+		//initialize joysticks:
+		stickDrive = new Joystick(1);
+		stickForklift = new Joystick(0);
+		
+		//initialize speed controllers:
+		talonFrontLeft = new Talon(1);
+		talonFrontRight = new Talon(2);
+		talonRearLeft = new Talon(3);
+		talonRearRight = new Talon(4);
+		talonArm = new Talon(5);
+		talonLift = new Talon(6);
+		victorShooter = new Victor(7);
+
+		//initialize encoders:
+		encoderFrontLeft = new Encoder(10, 11, false);
+		encoderFrontRight = new Encoder(12, 13, false);
+		encoderRearLeft = new Encoder(14, 15, false);
+		encoderRearRight = new Encoder(16, 17, false);
+		encoderArm = new Encoder(18, 19, false);
+		encoderLift = new Encoder(20, 21, false);
+		encoderLift.setReverseDirection(true);//invert this encoder
+		encoderFrontLeft.setSamplesToAverage(samplesToAverage);
+		encoderFrontRight.setSamplesToAverage(samplesToAverage);
+		encoderRearLeft.setSamplesToAverage(samplesToAverage);
+		encoderRearRight.setSamplesToAverage(samplesToAverage);
+		
+		
+		//initialize limit switches:
+		limitSwitchIn = new DigitalInput(0);
+		limitSwitchOut = new DigitalInput(1);
+		limitSwitchDown = new DigitalInput(2);
+		limitSwitchUp = new DigitalInput(3);
+		
+		//initialize gyro:
+		gyro = new Gyro(1);
+		gyro.initGyro();
+		gyro.reset();
+
+		//initialize timer:
+		timer = new Timer();		
+		
+		//initialize smartDashboard:
+		smartDashboard = new SmartDashboard();
+		
+		//initialize lights pin:
+		lightsRedBlue= new DigitalOutput(4);
+		lightsDance= new DigitalOutput(5);
+		lightsGreen= new DigitalOutput(6);
+	}//end robotInit()
+
+	//This function is called once before autonomous:
+	public void autonomousInit() {
+		timeAutoInit = Timer.getFPGATimestamp();
+		gyro.reset();
+	}//end autonomousInit()
+
+	
+	//This function is called periodically during autonomous:
+	public void autonomousPeriodic() {
+		timeAutoFinal = Timer.getFPGATimestamp() - timeAutoInit;
+		
+		if (encoderLift.get()<200) {talonLift.set(0.8);}
+		else {talonLift.set(0);}
+	
+		if ((timeAutoFinal > 1) && (timeAutoFinal < 2)) {drive (0.6, Math.PI/2, 0, false);} 
+		else if ((timeAutoFinal > 2) && (timeAutoFinal < 3)) {drive (0, 0, 0, false);}
+		else if ((timeAutoFinal > 3) && (timeAutoFinal < 5)) {if (encoderFrontLeft.get() < 2350) {drive (0.6, 0, 0, false);} else {drive(0,0,0, false);}}//distance: ~60in, diameter = 6, 250 pulses/rev
+		else if ((timeAutoFinal > 5) && (timeAutoFinal < 6)) {drive (0, 0, 0, false);}
+		else if ((timeAutoFinal > 6) && (timeAutoFinal < 9)) {drive (0.6, Math.PI*1.5, 0, false);}
+		else {drive(0,0,0,false);}
+			
+		if (timeAutoFinal == 2.5)	{encoderFrontLeft.reset(); resetGyro(270);}
+
+		//angle = gyro.getAngle();
+		//timeFinal = Timer.getFPGATimestamp() - timeInitial;
+		//if (timeFinal < 3) 								{talonArm.set(-0.5);} 				else {talonArm.set(0);}
+		//if ((timeFinal > 3) && (timeFinal < 6)) 		{talonLift.set(0.5);} 				else {talonLift.set(0);}
+		//if ((timeFinal > 6) && (timeFinal < 9)) 		{drive2262(/*0.5, angle * Kp*/);} 	
+		//else {if ((timeFinal > 11) && (timeFinal < 14))	{drive2262(/*-0.5, angle * Kp*/);} 	else {drive2262(/*0, 0*/);}}
+		//if ((timeFinal == 10)) {gyro.reset();}//time might not ever be exactly 10 //why reset gyro now?
+    }//end autonomousPeriodic()
+	
+	//This function is called once before teleop:
+	public void teleopInit(){
+		
+		timeInitial = Timer.getFPGATimestamp();
+	}//end teleopInit()
+	
+	//This function is called periodically during operator control:
+	public void teleopPeriodic() {
+		//update time:
+		timeFinal = Timer.getFPGATimestamp() - timeInitial;
+		
+		//update drive:
+		//if(stickForklift.getRawButton(3)){turnWheelsTest(-1);}
+		//else{drive(getJoystickMagnitude(),getJoystickDirection(),stickDrive.getZ(),stickDrive.getRawButton(1));}
+		drive(getJoystickMagnitude(),getJoystickDirection(),stickDrive.getZ(),stickDrive.getRawButton(1));
+		
+		//recalibrate gyro if pressing button
+		if(stickDrive.getRawButton(2)){resetGyro(0);}
+		
+		//update forklift:
+		forklift(stickForklift.getY(), stickForklift.getRawButton(3), stickForklift.getRawButton(2), stickForklift.getRawButton(5), stickForklift.getRawButton(4));
+		
+		//update shooter:
+		if (stickForklift.getRawButton(1)) {victorShooter.set(shooterMaxSpeed);lightsGreen.set(false);} 
+		else {victorShooter.set(0);lightsGreen.set(true);}
+		
+		if (stickForklift.getRawButton(7)||stickDrive.getRawButton(7)) {lightsDance.set(false);}else{lightsGreen.set(true);}
+		
+		/*//remap forkliftjoystick for testing:
+		if(stickForklift.getRawButton(4)){if(samplesToAverage>1){samplesToAverage--;}}
+		if(stickForklift.getRawButton(5)){if(samplesToAverage<127){samplesToAverage++;}}*/
+		
+		//adjust the speed to be units revolutions per second:
+		frontLeftSpeed=encoderFrontLeft.getRate()/250;//250 pulses per revolution
+		frontRightSpeed=encoderFrontRight.getRate()/360;//360 pulses per revolution
+		rearLeftSpeed=encoderRearLeft.getRate()/250;//250 pulses per revolution
+		rearRightSpeed=encoderRearRight.getRate()/360;//360 pulses per revolution
+		
+		/*//debug statements:
+		System.out.println();
+		System.out.println("Encoder Front Left Speed:  " + encoderFrontLeft.getRate());
+		System.out.println("Encoder Front Right Speed: " + encoderFrontRight.getRate());
+		System.out.println("Encoder Rear Left Speed:   " + encoderRearLeft.getRate());
+		System.out.println("Encoder Rear Right Speed:  " + encoderRearRight.getRate());
+		System.out.println("samplesToAverage: " + samplesToAverage);*/
+		SmartDashboard.putNumber("time", timeFinal);
+		SmartDashboard.putNumber("Encoder Arm", encoderArm.getDistance());
+	    SmartDashboard.putNumber("Encoder Lift", encoderLift.getDistance());
+		SmartDashboard.putNumber("Encoder Front Left Speed", Math.abs(frontLeftSpeed));
+		SmartDashboard.putNumber("Encoder Front Right Speed", Math.abs(frontRightSpeed));
+		SmartDashboard.putNumber("Encoder Rear Left Speed", Math.abs(rearLeftSpeed));
+		SmartDashboard.putNumber("Encoder Rear Right Speed", Math.abs(rearRightSpeed));		
+	    SmartDashboard.putNumber("front left p", PIDFrontLeft.p);
+	    SmartDashboard.putNumber("front left i", PIDFrontLeft.i);
+	    SmartDashboard.putNumber("front left d", PIDFrontLeft.d);
+	    SmartDashboard.putNumber("front left kp", PIDFrontLeft.kp);
+	    SmartDashboard.putNumber("front left ki", PIDFrontLeft.ki);
+	    SmartDashboard.putNumber("front left kd", PIDFrontLeft.kd);
+	    SmartDashboard.putNumber("front left pid output", PIDFrontLeft.output);
+	    SmartDashboard.putNumber("front left target", PIDFrontLeft.target);
+	    SmartDashboard.putNumber("front left error", PIDFrontLeft.error);
+	    
+	    System.out.println("Limit Switch In:  " + limitSwitchIn.get());
+	    System.out.println("Limit Switch Out:  " + limitSwitchOut.get());
+	    
+	    //HI JEREMY 
+	    //hello! who is this?
+	    //Yoshi
+	    //oh hey buddy hows it goin?
+	    //good, good, you?
+	    //idk man kinda stressed- if this code doesnt work we are screwed
+	    //
+	    
+	    //LIGHTS:
+	    DriverStation.Alliance color;
+	    color = DriverStation.getInstance().getAlliance();
+	    if(color == DriverStation.Alliance.Invalid){lightsRedBlue.set(clock); clock=!clock;}
+	    else if(color == DriverStation.Alliance.Blue){lightsRedBlue.set(true);}
+	    else if(color == DriverStation.Alliance.Red){lightsRedBlue.set(false);}
+	    
+	}//end teleopPeriodic()
+
+	public void testInit(){
+	}//end testInit()
+	
+	// This function is called periodically during test mode:
+	public void testPeriodic() {
+		double armSpeed=-.2;
+		if ((armSpeed<0)&&(limitSwitchIn.get())){armSpeed=0;}//stop if limit switch is tripped
+		if ((armSpeed>0)&&(limitSwitchOut.get())){armSpeed=0;}//stop if limit switch is tripped
+		talonArm.set(armSpeed);	
+		double liftSpeed=-.2;
+		if ((liftSpeed<0)&&(limitSwitchDown.get())){liftSpeed=0;}//stop if limit switch is tripped
+		if ((liftSpeed>0)&&(limitSwitchUp.get())){liftSpeed=0;}//stop if limit switch is tripped
+		talonArm.set(liftSpeed);	
+	}//end testPeriodic()
+	
+	//output (full) voltage until sensed speed is equal to intended speed:
+	double encoderController(double desiredSpeed, double currentSpeed, double rawVoltage){
+		double voltage=0;
+		if(desiredSpeed>0.2){
+			if (desiredSpeed>currentSpeed){voltage=kVoltage*rawVoltage;}
+			if (desiredSpeed<currentSpeed){voltage=0;}
+		}
+		if(desiredSpeed<-0.2){
+			if (desiredSpeed<currentSpeed){voltage=kVoltage*rawVoltage;}
+			if (desiredSpeed>currentSpeed){voltage=0;}
+		}
+		if (voltage>1) {voltage=1;}
+		if (voltage<-1) {voltage=-1;}
+		return voltage;
+	}//end encoderController()
+
+	//reduce the change in output so that there is no jerking around:
+	double lowPassFilter(double lastOutputToEsc, double currentOutputToEsc){
+		if (Math.abs(currentOutputToEsc-lastOutputToEsc)>maxRateOfChange){
+			if (currentOutputToEsc>lastOutputToEsc){currentOutputToEsc=lastOutputToEsc+maxRateOfChange;} 
+			else if (currentOutputToEsc<lastOutputToEsc){currentOutputToEsc=lastOutputToEsc-maxRateOfChange;}
+		}
+		return currentOutputToEsc;
+	}//end lowPassFilter()
+}//end Robot Class
+
+//PIDController class:
+class PIDController{
+	//variables: 
+	double kp;
+	double ki;
+	double kd;
+	double totalError;
+	double lastError;
+	double error;
+	double target;
+	double feedback;
+	double slope;
+	double output;
+	double p;
+	double i;
+	double d;
+
+	//constructor:
+	PIDController(double _kp, double _ki, double _kd){
+		kp=_kp;
+		ki=_ki;
+		kd=_kd;
+		totalError=0;
+		lastError=0;
+		error=0;
+		target=0;
+		feedback=0;
+		slope=0;
+		output=0;
+		p=0;
+		i=0;
+		d=0;
+	}//end constructor
+	
+	//pid loop
+	double getOutput(double _target, double _feedback){ 
+		target=_target;
+		feedback=_feedback;
+		error=feedback-target;
+		p=kp*error;
+		totalError=totalError*.98;//history has less of  weight as time increases.  
+		totalError=totalError+error;
+		i=ki*totalError;
+		slope=error-lastError;
+		d=kd*slope;
+		lastError=error;
+		output=p+i+d;
+		if (output>1){output=1;}
+		if (output<-1){output=-1;}
+		return output;
+	}//end getOutput
+}//end PIDController Class
