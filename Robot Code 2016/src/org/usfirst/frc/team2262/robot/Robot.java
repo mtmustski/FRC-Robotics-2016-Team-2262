@@ -20,140 +20,152 @@ import edu.wpi.first.wpilibj.DigitalInput;
  */
 public class Robot extends IterativeRobot {
 	RobotDrive myRobot;
-	
-	//adding CAN Talons for drive motors
-	
-	/*driveMotorClass = new DriveMotor(front, back);
-	DriveMotor leftDrive;
-	DriveMotor rightDrive;*/
-	
+
+	// adding CAN Talons for drive motors
+
+	/*
+	 * driveMotorClass = new DriveMotor(front, back); DriveMotor leftDrive;
+	 * DriveMotor rightDrive;
+	 */
+
 	TalonSRX frontLeft;
 	TalonSRX rearLeft;
 	TalonSRX frontRight;
 	TalonSRX rearRight;
-	
-	//adding victors for arm
-	Talon elbow; 
+
+	// adding victors for arm
+	Talon elbow;
 	Talon armRoller;
-	
-	//adding victors for Tape Measure
+
+	// adding victors for Tape Measure
 	Talon tapeRoller;
 	Talon frontClimber;
-	Talon backClimber; 
-	
-	//adding sensors
+	Talon backClimber;
+
+	// adding sensors
 	Encoder leftEncoder;
 	Encoder rightEncoder;
-	
+
 	Ultrasonic ultrasonic;
-	
+
 	DigitalInput limitSwitchTop;
 	DigitalInput limitSwitchBottom;
-	
+
 	int autoLoopCounter;
-	
-	//adding camera 
-	CameraServer server; 
-	
-	//adding joystick
+
+	// adding camera
+	CameraServer server;
+
+	// adding joystick
 	Joystick joystick;
-	
-	//adding xbox 360 controller
-	Joystick xboxController;
-	
-	//adding arm class
+
+	// adding xbox 360 controller
+	Joystick controller;
+
+	// adding xbox controller mapping
+	ControllerMapping controllerMapping;
+
+	// adding arm class
 	Arm arm;
-		
-    /**
-     * This function is run when the robot is first started up and should be
-     * used for any initialization code.
-     */	
-    public void robotInit() {
-    	
-    	//creating new instance of xboxController
-    	xboxController = new Joystick(1);
-    	
-    	//creating new instance of joystick
-    	joystick = new Joystick(0);
-    	
-    	//camera 
-    	server = CameraServer.getInstance();
-        server.setQuality(50);
-        //the camera name (ex "cam0") can be found through the roborio web interface
-        server.startAutomaticCapture("cam0");
-     
-        //initializing drive motors 
-        
-        /*leftDrive = new DriveMotor(0, 1);
-        rightDrive = new DriveMotor(2, 3);*/
-        
-        frontLeft = new TalonSRX(0);
-        rearLeft = new TalonSRX(1);
-        frontRight = new TalonSRX(2);
-        rearRight = new TalonSRX(3);
-        
-        //initializing RobotDrive
-        myRobot = new RobotDrive (frontLeft, rearLeft, frontRight, rearRight);
-        
-       /* //initializing arm motors
-        elbow = new Talon(0);
-        armRoller = new Talon(1); */
-        
-        //initializing arm class
-        arm = new Arm(0, 1, 8, 9);    
-        
-    }
-    
-    /**
-     * This function is run once each time the robot enters autonomous mode
-     */
-    public void autonomousInit() {
-    	autoLoopCounter = 0;
-    	
-    }
 
-    /**
-     * This function is called periodically during autonomous
-     */
-    public void autonomousPeriodic() {
-    	if(autoLoopCounter < 100) //Check if we've completed 100 loops (approximately 2 seconds)
+	/**
+	 * This function is run when the robot is first started up and should be
+	 * used for any initialization code.
+	 */
+	public void robotInit() {
+
+		// creating new instance of xboxController
+		controller = new Joystick(1);
+
+		// creating new instance of controllerMapping
+		controllerMapping = new ControllerMapping();
+
+		// creating new instance of joystick
+		joystick = new Joystick(0);
+
+		// camera
+		server = CameraServer.getInstance();
+		server.setQuality(50);
+		// the camera name (ex "cam0") can be found through the roborio web
+		// interface
+		server.startAutomaticCapture("cam0");
+
+		// initializing drive motors
+
+		/*
+		 * leftDrive = new DriveMotor(0, 1); rightDrive = new DriveMotor(2, 3);
+		 */
+
+		frontLeft = new TalonSRX(0);
+		rearLeft = new TalonSRX(1);
+		frontRight = new TalonSRX(2);
+		rearRight = new TalonSRX(3);
+
+		// initializing RobotDrive
+		myRobot = new RobotDrive(frontLeft, rearLeft, frontRight, rearRight);
+
+		/*
+		 * //initializing arm motors elbow = new Talon(0); armRoller = new
+		 * Talon(1);
+		 */
+
+		// initializing arm class
+		arm = new Arm(0, 1, 8, 9);
+
+	}
+
+	/**
+	 * This function is run once each time the robot enters autonomous mode
+	 */
+	public void autonomousInit() {
+		autoLoopCounter = 0;
+
+	}
+
+	/**
+	 * This function is called periodically during autonomous
+	 */
+	public void autonomousPeriodic() {
+		if (autoLoopCounter < 100) // Check if we've completed 100 loops
+									// (approximately 2 seconds)
 		{
-			myRobot.drive(-0.5, 0.0); 	// drive forwards half speed
+			myRobot.drive(-0.5, 0.0); // drive forwards half speed
 			autoLoopCounter++;
-			} else {
-			myRobot.drive(0.0, 0.0); 	// stop robot
+		} else {
+			myRobot.drive(0.0, 0.0); // stop robot
 		}
-    	
-    }
-    
-    /**
-     * This function is called once each time the robot enters tele-operated mode
-     */
-    public void teleopInit(){
-    	
-    	/*leftDrive.stop();
-    	rightDrive.stop();*/  
-    	
-    }
 
-    /**
-     * This function is called periodically during operator control
-     */
-    public void teleopPeriodic() {
-    	//drive
-    	myRobot.arcadeDrive(xboxController, 5, xboxController, 1);
-    	
-    	//arm
-    	arm.elbowMotion (xboxController.getRawButton(6), xboxController.getRawButton(5));
-    	
-    }
-    
-    /**
-     * This function is called periodically during test mode
-     */
-    public void testPeriodic() {
-    	LiveWindow.run();
-    	
-    }
-    
+	}
+
+	/**
+	 * This function is called once each time the robot enters tele-operated
+	 * mode
+	 */
+	public void teleopInit() {
+
+		/*
+		 * leftDrive.stop(); rightDrive.stop();
+		 */
+
+	}
+
+	/**
+	 * This function is called periodically during operator control
+	 */
+	public void teleopPeriodic() {
+		// drive
+		myRobot.arcadeDrive(controller, 5, controller, 1);
+
+		// arm
+		arm.elbowMotion(controller.getRawAxis(controllerMapping.triggers));
+	}
+
+	/**
+	 * This function is called periodically during test mode
+	 */
+	public void testPeriodic() {
+		LiveWindow.run();
+
+	}
+
 }
