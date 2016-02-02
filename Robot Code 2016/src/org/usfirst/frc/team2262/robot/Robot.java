@@ -3,8 +3,6 @@ package org.usfirst.frc.team2262.robot;
 import edu.wpi.first.wpilibj.IterativeRobot;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.RobotDrive;
-import edu.wpi.first.wpilibj.TalonSRX;
-import edu.wpi.first.wpilibj.Talon;
 import edu.wpi.first.wpilibj.livewindow.LiveWindow;
 import edu.wpi.first.wpilibj.CameraServer;
 import edu.wpi.first.wpilibj.Encoder;
@@ -28,19 +26,28 @@ public class Robot extends IterativeRobot {
 	 * DriveMotor rightDrive;
 	 */
 
-	TalonSRX frontLeft;
-	TalonSRX rearLeft;
-	TalonSRX frontRight;
-	TalonSRX rearRight;
+	/*
+	 * TalonSRX frontLeft; TalonSRX rearLeft; TalonSRX frontRight; TalonSRX
+	 * rearRight;
+	 */
 
-	// adding victors for arm
-	Talon elbow;
-	Talon armRoller;
+	/*
+	 * adding victors for arm Talon elbow; Talon roller;
+	 */
 
-	// adding victors for Tape Measure
-	Talon tapeRoller;
-	Talon frontClimber;
-	Talon backClimber;
+	/*
+	 * adding victors for Tape Measure Talon frictionWheel; Talon backClimber;
+	 * Talon frontClimber;
+	 */
+
+	// adding drive class
+	Drive drive;
+
+	// adding arm class
+	Arm arm;
+
+	// adding tape measure class
+	TapeMeasure tapeMeasure;
 
 	// adding sensors
 	Encoder leftEncoder;
@@ -56,8 +63,9 @@ public class Robot extends IterativeRobot {
 	// adding camera
 	CameraServer server;
 
-	// adding joystick
-	Joystick joystick;
+	/*
+	 * adding joystick Joystick joystick;
+	 */
 
 	// adding xbox 360 controller
 	Joystick controller;
@@ -65,14 +73,20 @@ public class Robot extends IterativeRobot {
 	// adding xbox controller mapping
 	ControllerMapping controllerMapping;
 
-	// adding arm class
-	Arm arm;
-
 	/**
 	 * This function is run when the robot is first started up and should be
 	 * used for any initialization code.
 	 */
 	public void robotInit() {
+
+		// initializing drive class
+		drive = new Drive(0, 1, 2, 3, 0);
+
+		// initializing arm class
+		arm = new Arm(0, 1, 8, 9);
+
+		// initializing tape measure class
+		tapeMeasure = new TapeMeasure(2, 3, 4);
 
 		// creating new instance of xboxController
 		controller = new Joystick(1);
@@ -80,8 +94,9 @@ public class Robot extends IterativeRobot {
 		// creating new instance of controllerMapping
 		controllerMapping = new ControllerMapping();
 
-		// creating new instance of joystick
-		joystick = new Joystick(0);
+		/*
+		 * creating new instance of joystick joystick = new Joystick(0);
+		 */
 
 		// camera
 		server = CameraServer.getInstance();
@@ -96,21 +111,18 @@ public class Robot extends IterativeRobot {
 		 * leftDrive = new DriveMotor(0, 1); rightDrive = new DriveMotor(2, 3);
 		 */
 
-		frontLeft = new TalonSRX(0);
-		rearLeft = new TalonSRX(1);
-		frontRight = new TalonSRX(2);
-		rearRight = new TalonSRX(3);
-
-		// initializing RobotDrive
-		myRobot = new RobotDrive(frontLeft, rearLeft, frontRight, rearRight);
+		/*
+		 * frontLeft = new TalonSRX(0); rearLeft = new TalonSRX(1); frontRight =
+		 * new TalonSRX(2); rearRight = new TalonSRX(3);
+		 * 
+		 * initializing RobotDrive myRobot = new RobotDrive(frontLeft, rearLeft,
+		 * frontRight, rearRight);
+		 */
 
 		/*
 		 * //initializing arm motors elbow = new Talon(0); armRoller = new
 		 * Talon(1);
 		 */
-
-		// initializing arm class
-		arm = new Arm(0, 1, 8, 9);
 
 	}
 
@@ -153,11 +165,20 @@ public class Robot extends IterativeRobot {
 	 * This function is called periodically during operator control
 	 */
 	public void teleopPeriodic() {
+
 		// drive
-		myRobot.arcadeDrive(controller, 5, controller, 1);
+		drive.driveMotion();
 
 		// arm
+		arm.ballIntake(controller.getRawButton(controllerMapping.leftBumper));
+		arm.ballOutput(controller.getRawButton(controllerMapping.rightBumper));
 		arm.elbowMotion(controller.getRawAxis(controllerMapping.triggers));
+		arm.rollerMotion(controller.getRawButton(controllerMapping.buttonX),
+				controller.getRawButton(controllerMapping.buttonB));
+
+		// tape measure
+		tapeMeasure.pushUp(controller.getRawButton(controllerMapping.buttonY));
+		tapeMeasure.pullDown(controller.getRawButton(controllerMapping.buttonA));
 	}
 
 	/**

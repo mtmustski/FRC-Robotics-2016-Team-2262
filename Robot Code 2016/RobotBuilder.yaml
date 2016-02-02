@@ -14,7 +14,7 @@ Children:
           validators: &id002 [CANID]
           value: '0'
       Base: CAN Talon
-      Name: leftFront
+      Name: frontLeft
     - Children: []
       Properties:
         CAN ID: !!robotbuilder.data.properties.ChoicesProperty
@@ -24,7 +24,7 @@ Children:
           validators: *id002
           value: '1'
       Base: CAN Talon
-      Name: leftBack
+      Name: rearLeft
     - Children: []
       Properties:
         CAN ID: !!robotbuilder.data.properties.ChoicesProperty
@@ -34,7 +34,7 @@ Children:
           validators: *id002
           value: '2'
       Base: CAN Talon
-      Name: rightFront
+      Name: frontRight
     - Children: []
       Properties:
         CAN ID: !!robotbuilder.data.properties.ChoicesProperty
@@ -44,7 +44,7 @@ Children:
           validators: *id002
           value: '3'
       Base: CAN Talon
-      Name: rightBack
+      Name: rearRight
     Properties:
       Default command parameters: !!robotbuilder.data.properties.ParametersProperty
         default: []
@@ -157,7 +157,7 @@ Children:
           validators: *id005
           value: '4'
       Base: Speed Controller
-      Name: backClimber
+      Name: rearClimber
     Properties:
       Default command parameters: !!robotbuilder.data.properties.ParametersProperty
         default: []
