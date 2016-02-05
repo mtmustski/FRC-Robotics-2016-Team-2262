@@ -17,176 +17,225 @@ import edu.wpi.first.wpilibj.DigitalInput;
  * directory.
  */
 public class Robot extends IterativeRobot {
-	RobotDrive myRobot;
+        RobotDrive myRobot;
 
-	// adding CAN Talons for drive motors
+        // adding CAN Talons for drive motors
 
-	/*
-	 * driveMotorClass = new DriveMotor(front, back); DriveMotor leftDrive;
-	 * DriveMotor rightDrive;
-	 */
+        /*
+         * driveMotorClass = new DriveMotor(front, back); DriveMotor leftDrive;
+         * DriveMotor rightDrive;
+         */
 
-	/*
-	 * TalonSRX frontLeft; TalonSRX rearLeft; TalonSRX frontRight; TalonSRX
-	 * rearRight;
-	 */
+        /*
+         * TalonSRX frontLeft; TalonSRX rearLeft; TalonSRX frontRight; TalonSRX
+         * rearRight;
+         */
 
-	/*
-	 * adding victors for arm Talon elbow; Talon roller;
-	 */
+        /*
+         * adding victors for arm Talon elbow; Talon roller;
+         */
 
-	/*
-	 * adding victors for Tape Measure Talon frictionWheel; Talon backClimber;
-	 * Talon frontClimber;
-	 */
+        /*
+         * adding victors for Tape Measure Talon frictionWheel; Talon backClimber;
+         * Talon frontClimber;
+         */
 
-	// adding drive class
-	Drive drive;
+        // adding drive class
+        Drive drive;
 
-	// adding arm class
-	Arm arm;
+        // adding arm class
+        Arm arm;
 
-	// adding tape measure class
-	TapeMeasure tapeMeasure;
+        // adding tape measure class
+        TapeMeasure tapeMeasure;
 
-	// adding sensors
-	Encoder leftEncoder;
-	Encoder rightEncoder;
+        // adding sensors
+        Encoder leftEncoder;
+        Encoder rightEncoder;
 
-	Ultrasonic ultrasonic;
+        Ultrasonic ultrasonic;
 
-	DigitalInput limitSwitchTop;
-	DigitalInput limitSwitchBottom;
+        DigitalInput limitSwitchTop;
+        DigitalInput limitSwitchBottom;
 
-	int autoLoopCounter;
+        int autoLoopCounter;
 
-	// adding camera
-	CameraServer server;
+        // adding camera
+        CameraServer server;
 
-	/*
-	 * adding joystick Joystick joystick;
-	 */
+        /*
+         * adding joystick Joystick joystick;
+         */
 
-	// adding xbox 360 controller
-	Joystick controller;
+        // adding xbox 360 controller
+        Joystick controller;
 
-	// adding xbox controller mapping
-	ControllerMapping controllerMapping;
+        // adding xbox controller mapping
+        ControllerMapping controllerMapping;
 
-	/**
-	 * This function is run when the robot is first started up and should be
-	 * used for any initialization code.
-	 */
-	public void robotInit() {
+        // Autonomous variables.
+        int distance = 20;
+        int howFarToGo = 0;
 
-		// initializing drive class
-		drive = new Drive(0, 1, 2, 3, 0);
+        enum AutonomousState { MoveToX, TrunToTower, MoveToTower, Aim, Shoot, Done};
+        AutonomousState myState = AutonomousState.MoveToX;
+        double direction = 0.0;
 
-		// initializing arm class
-		arm = new Arm(0, 1, 8, 9);
+        /**
+         * This function is run when the robot is first started up and should be
+         * used for any initialization code.
+         */
+        public void robotInit() {
 
-		// initializing tape measure class
-		tapeMeasure = new TapeMeasure(2, 3, 4);
+                // initializing drive class
+                drive = new Drive(0, 1, 2, 3, 0);
 
-		// creating new instance of xboxController
-		controller = new Joystick(1);
+                // initializing arm class
+                arm = new Arm(0, 1, 8, 9);
 
-		// creating new instance of controllerMapping
-		controllerMapping = new ControllerMapping();
+                // initializing tape measure class
+                tapeMeasure = new TapeMeasure(2, 3, 4);
 
-		/*
-		 * creating new instance of joystick joystick = new Joystick(0);
-		 */
+                // creating new instance of xboxController
+                controller = new Joystick(1);
 
-		// camera
-		server = CameraServer.getInstance();
-		server.setQuality(50);
-		// the camera name (ex "cam0") can be found through the roborio web
-		// interface
-		server.startAutomaticCapture("cam0");
+                // creating new instance of controllerMapping
+                controllerMapping = new ControllerMapping();
 
-		// initializing drive motors
+                /*
+                 * creating new instance of joystick joystick = new Joystick(0);
+                 */
 
-		/*
-		 * leftDrive = new DriveMotor(0, 1); rightDrive = new DriveMotor(2, 3);
-		 */
+                // camera
+                server = CameraServer.getInstance();
+                server.setQuality(50);
+                // the camera name (ex "cam0") can be found through the roborio web
+                // interface
+                server.startAutomaticCapture("cam0");
 
-		/*
-		 * frontLeft = new TalonSRX(0); rearLeft = new TalonSRX(1); frontRight =
-		 * new TalonSRX(2); rearRight = new TalonSRX(3);
-		 * 
-		 * initializing RobotDrive myRobot = new RobotDrive(frontLeft, rearLeft,
-		 * frontRight, rearRight);
-		 */
+                // initializing drive motors
 
-		/*
-		 * //initializing arm motors elbow = new Talon(0); armRoller = new
-		 * Talon(1);
-		 */
+                /*
+                 * leftDrive = new DriveMotor(0, 1); rightDrive = new DriveMotor(2, 3);
+                 */
 
-	}
+                /*
+                 * frontLeft = new TalonSRX(0); rearLeft = new TalonSRX(1); frontRight =
+                 * new TalonSRX(2); rearRight = new TalonSRX(3);
+                 *
+                 * initializing RobotDrive myRobot = new RobotDrive(frontLeft, rearLeft,
+                 * frontRight, rearRight);
+                 */
 
-	/**
-	 * This function is run once each time the robot enters autonomous mode
-	 */
-	public void autonomousInit() {
-		autoLoopCounter = 0;
+                /*
+                 * //initializing arm motors elbow = new Talon(0); armRoller = new
+                 * Talon(1);
+                 */
 
-	}
+        }
 
-	/**
-	 * This function is called periodically during autonomous
-	 */
-	public void autonomousPeriodic() {
-		if (autoLoopCounter < 100) // Check if we've completed 100 loops
-									// (approximately 2 seconds)
-		{
-			myRobot.drive(-0.5, 0.0); // drive forwards half speed
-			autoLoopCounter++;
-		} else {
-			myRobot.drive(0.0, 0.0); // stop robot
-		}
+        /**
+         * This function is run once each time the robot enters autonomous mode
+         */
+        public void autonomousInit() {
+                autoLoopCounter = 0;
+                distance = 20;
+                howFarToGo = 0;
 
-	}
+                }
 
-	/**
-	 * This function is called once each time the robot enters tele-operated
-	 * mode
-	 */
-	public void teleopInit() {
+        /**
+         * This function is called periodically during autonomous
+         */
+        public void autonomousPeriodic() {
+                if (autoLoopCounter < 100) // Check if we've completed 100 loops
+                                                                        // (approximately 2 seconds)
+                {
+                        myRobot.drive(-0.5, 0.0); // drive forwards half speed
+                        autoLoopCounter++;
+                } else {
+                        myRobot.drive(0.0, 0.0); // stop robot
+                }
 
-		/*
-		 * leftDrive.stop(); rightDrive.stop();
-		 */
+                switch (myState) {
+                case MoveToX:
+                        // Have I turned?
+                        // How far have I gone?
+                        // How far do I have to go?
+                        // have I got there?
+                        // If yes. myState = TurnToTower;
 
-	}
+                        break;
+                case TrunToTower:
+                        // Have I turned enough?
+                        // If yes. myState = MoveToTower
 
-	/**
-	 * This function is called periodically during operator control
-	 */
-	public void teleopPeriodic() {
+                        break;
+                case MoveToTower:
+                        // Have I turned?
+                        // How far have I gone?
+                        // How far do I have to go?
+                        // Have I got there.
+                        // If yes. myState = Aim
 
-		// drive
-		drive.driveMotion();
+                        break;
+                case Aim:
+                        // Aim correct?
+                        // If yes. myState = shoot;
+                        // If no.
+                        //    Need to trun left? if so turn
+                        //    Need to Turn right? if so turn
 
-		// arm
-		arm.ballIntake(controller.getRawButton(controllerMapping.leftBumper));
-		arm.ballOutput(controller.getRawButton(controllerMapping.rightBumper));
-		arm.elbowMotion(controller.getRawAxis(controllerMapping.triggers));
-		arm.rollerMotion(controller.getRawButton(controllerMapping.buttonX),
-				controller.getRawButton(controllerMapping.buttonB));
+                        break;
+                case Shoot:
+                        // Shoot;
+                        myState = AutonomousState.Done;
 
-		// tape measure
-		tapeMeasure.pushUp(controller.getRawButton(controllerMapping.buttonY));
-		tapeMeasure.pullDown(controller.getRawButton(controllerMapping.buttonA));
-	}
+                case Done:
+                        // flash lights.
+                        // Sound horn.
+                }
 
-	/**
-	 * This function is called periodically during test mode
-	 */
-	public void testPeriodic() {
-		LiveWindow.run();
+        }
 
-	}
+        /**
+         * This function is called once each time the robot enters tele-operated
+         * mode
+         */
+        public void teleopInit() {
+
+                /*
+                 * leftDrive.stop(); rightDrive.stop();
+                 */
+
+        }
+
+        /**
+         * This function is called periodically during operator control
+         */
+        public void teleopPeriodic() {
+
+                // drive
+                drive.driveMotion();
+
+                // arm
+                arm.ballIntake(controller.getRawButton(controllerMapping.leftBumper));
+                arm.ballOutput(controller.getRawButton(controllerMapping.rightBumper));
+                arm.elbowMotion(controller.getRawAxis(controllerMapping.triggers));
+                arm.rollerMotion(controller.getRawButton(controllerMapping.buttonX),
+                                controller.getRawButton(controllerMapping.buttonB));
+
+                // tape measure
+                tapeMeasure.pushUp(controller.getRawButton(controllerMapping.buttonY));
+                tapeMeasure.pullDown(controller.getRawButton(controllerMapping.buttonA));
+        }
+
+        /**
+         * This function is called periodically during test mode
+         */
+        public void testPeriodic() {
+                LiveWindow.run();
+
+        }
 
 }
