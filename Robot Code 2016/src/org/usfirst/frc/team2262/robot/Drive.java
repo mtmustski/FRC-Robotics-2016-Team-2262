@@ -15,6 +15,7 @@ public class Drive {
 
 	Joystick joystick;
 
+
 	public Drive(int frontLeftChannel, int rearLeftChannel, int frontRightChannel, int rearRightChannel,
 			int joystickPort) {
 
@@ -27,6 +28,36 @@ public class Drive {
 
 		joystick = new Joystick(joystickPort);
 
+	}
+	
+	public void driveForward(double speed) {
+		frontLeft.set(speed);
+		rearLeft.set(speed);
+		frontRight.set(speed);
+		rearRight.set(speed);
+		
+	}
+	
+	public void stop(){
+		frontLeft.set(0);
+		rearLeft.set(0);
+		frontRight.set(0);
+		rearRight.set(0);
+	}
+	
+	public void turnRight(double speed){
+		frontLeft.set(speed);
+		rearLeft.set(speed);
+		frontRight.set((double)-1*speed);
+		rearRight.set((double)-1*speed);
+		
+	}
+	
+	public void turnLeft(double speed){
+		frontLeft.set((double)-1*speed);
+		rearLeft.set((double)-1*speed);
+		frontRight.set(speed);
+		rearRight.set(speed);
 	}
 
 	public void driveMotion() {
