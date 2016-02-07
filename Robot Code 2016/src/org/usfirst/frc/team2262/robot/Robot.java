@@ -1,4 +1,5 @@
 package org.usfirst.frc.team2262.robot;
+
 import edu.wpi.first.wpilibj.IterativeRobot;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.RobotDrive;
@@ -7,6 +8,7 @@ import edu.wpi.first.wpilibj.CameraServer;
 import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.Ultrasonic;
 import edu.wpi.first.wpilibj.DigitalInput;
+import edu.wpi.first.wpilibj.smartdashboard.*;
 
 /**
  * The VM is configured to automatically run this class, and to call the
@@ -18,25 +20,27 @@ import edu.wpi.first.wpilibj.DigitalInput;
 public class Robot extends IterativeRobot {
 	RobotDrive myRobot;
 
-	// adding CAN Talons for drive motors
-
 	/*
+	 * // adding CAN Talons for drive motors
+	 * 
+	 * 
 	 * driveMotorClass = new DriveMotor(front, back); DriveMotor leftDrive;
 	 * DriveMotor rightDrive;
-	 */
-
-	/*
+	 * 
+	 * 
+	 * 
 	 * TalonSRX frontLeft; TalonSRX rearLeft; TalonSRX frontRight; TalonSRX
 	 * rearRight;
-	 */
-
-	/*
+	 * 
+	 * 
+	 * 
 	 * adding victors for arm Talon elbow; Talon roller;
-	 */
-
-	/*
+	 * 
+	 * 
+	 * 
 	 * adding victors for Tape Measure Talon frictionWheel; Talon backClimber;
 	 * Talon frontClimber;
+	 * 
 	 */
 
 	// adding drive class
@@ -48,21 +52,26 @@ public class Robot extends IterativeRobot {
 	// adding tape measure class
 	TapeMeasure tapeMeasure;
 
-	//adding encoder class
+	// adding encoder class
 	WheelRotaion encoder;
-	
+
 	// adding sensors
-	
+
 	Ultrasonic ultrasonic;
 
 	DigitalInput limitSwitchTop;
 	DigitalInput limitSwitchBottom;
 
+	// declaring imu
+	ADIS16448_IMU imu;
 	int autoLoopCounter;
 
-	//declaring encoder distancePerPulse
+	// declaring encoder distancePerPulse
 	double distancePerPulse;
-	
+
+	// declare smartdashboard
+	SmartDashboard smartDashboard;
+
 	// adding camera
 	CameraServer server;
 
@@ -92,12 +101,17 @@ public class Robot extends IterativeRobot {
 	 * used for any initialization code.
 	 */
 	public void robotInit() {
-
+		// initialize smartDashboard:
+		smartDashboard = new SmartDashboard();
+		
 		// resetting encoders
 		encoder = new WheelRotaion(6, 360);
-		
 
-	
+		// Initialing imu
+		imu = new ADIS16448_IMU();
+
+		// calibrating the imu DO NOT TOUCH ROBIT!!!
+		imu.calibrate();
 		
 		// initializing drive class
 		drive = new Drive(0, 1, 2, 3, 0);
@@ -124,6 +138,8 @@ public class Robot extends IterativeRobot {
 		// the camera name (ex "cam0") can be found through the roborio web
 		// interface
 		server.startAutomaticCapture("cam0");
+
+		
 
 		// initializing drive motors
 
@@ -157,69 +173,63 @@ public class Robot extends IterativeRobot {
 	}
 
 	/**
-         * This function is called periodically during autonomous
-         */
-        public void autonomousPeriodic() {
-                /*if (autoLoopCounter < 100) // Check if we've completed 100 loops
-                                                                        // (approximately 2 seconds)
-                {
-                        myRobot.drive(-0.5, 0.0); // drive forwards half speed
-                        autoLoopCounter++;
-                } else {
-                        myRobot.drive(0.0, 0.0); // stop robot
-                }
-*/
-                switch (myState) {
-                case MoveToX:
-                
-    
-                	if(encoder.getDistance() > 10){
-                		drive.stop();
-                		myState = AutonomousState.TrunToTower;
-                	}
-                	else{
-                		drive.driveForward(.5);
-                	}
-                	
-                
-                        // Have I turned?
-                        // How far have I gone?
-                        // How far do I have to go?
-                        // have I got there?
-                        // If yes. myState = TurnToTower;
+	 * This function is called periodically during autonomous
+	 */
+	public void autonomousPeriodic() {
+		/*
+		 * if (autoLoopCounter < 100) // Check if we've completed 100 loops //
+		 * (approximately 2 seconds) { myRobot.drive(-0.5, 0.0); // drive
+		 * forwards half speed autoLoopCounter++; } else { myRobot.drive(0.0,
+		 * 0.0); // stop robot }
+		 */
+		switch (myState) {
+		case MoveToX:
 
-                        break;
-                case TrunToTower:
-                        // Have I turned enough?
-                        // If yes. myState = MoveToTower
+			if (encoder.getDistance() > 10) {
+				drive.stop();
+				myState = AutonomousState.TrunToTower;
+			} else {
+				drive.driveForward(.5);
+			}
 
-                        break;
-                case MoveToTower:
-                        // Have I turned?
-                        // How far have I gone?
-                        // How far do I have to go?
-                        // Have I got there.
-                        // If yes. myState = Aim
+			// Have I turned?
+			// How far have I gone?
+			// How far do I have to go?
+			// have I got there?
+			// If yes. myState = TurnToTower;
 
-                        break;
-                case Aim:
-                        // Aim correct?
-                        // If yes. myState = shoot;
-                        // If no.
-                        //    Need to trun left? if so turn
-                        //    Need to Turn right? if so turn
+			break;
+		case TrunToTower:
+			// Have I turned enough?
+			// If yes. myState = MoveToTower
 
-                        break;
-                case Shoot:
-                        // Shoot;
-                        myState = AutonomousState.Done;
+			break;
+		case MoveToTower:
+			// Have I turned?
+			// How far have I gone?
+			// How far do I have to go?
+			// Have I got there.
+			// If yes. myState = Aim
 
-                case Done:
-                        // flash lights.
-                        // Sound horn.
-                }
+			break;
+		case Aim:
+			// Aim correct?
+			// If yes. myState = shoot;
+			// If no.
+			// Need to trun left? if so turn
+			// Need to Turn right? if so turn
 
-        }
+			break;
+		case Shoot:
+			// Shoot;
+			myState = AutonomousState.Done;
+
+		case Done:
+			// flash lights.
+			// Sound horn.
+		}
+
+	}
 
 	/**
 	 * This function is called once each time the robot enters tele-operated
