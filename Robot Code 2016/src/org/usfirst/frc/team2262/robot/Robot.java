@@ -5,7 +5,7 @@ import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.RobotDrive;
 import edu.wpi.first.wpilibj.livewindow.LiveWindow;
 import edu.wpi.first.wpilibj.CameraServer;
-import edu.wpi.first.wpilibj.Encoder;
+//import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.Ultrasonic;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.smartdashboard.*;
@@ -88,6 +88,9 @@ public class Robot extends IterativeRobot {
 	// Autonomous variables.
 	int distance = 20;
 	int howFarToGo = 0;
+	double imuAngleOriginal = 0;
+	double imuAngleCurrent = 0;
+	double desiredDegrees = 0;
 
 	enum AutonomousState {
 		MoveToX, TrunToTower, MoveToTower, Aim, Shoot, Done
@@ -103,7 +106,7 @@ public class Robot extends IterativeRobot {
 	public void robotInit() {
 		// initialize smartDashboard:
 		smartDashboard = new SmartDashboard();
-		
+
 		// resetting encoders
 		encoder = new WheelRotaion(6, 360);
 
@@ -112,7 +115,7 @@ public class Robot extends IterativeRobot {
 
 		// calibrating the imu DO NOT TOUCH ROBIT!!!
 		imu.calibrate();
-		
+
 		// initializing drive class
 		drive = new Drive(0, 1, 2, 3, 0);
 
@@ -138,8 +141,6 @@ public class Robot extends IterativeRobot {
 		// the camera name (ex "cam0") can be found through the roborio web
 		// interface
 		server.startAutomaticCapture("cam0");
-
-		
 
 		// initializing drive motors
 
@@ -170,6 +171,12 @@ public class Robot extends IterativeRobot {
 		distance = 20;
 		howFarToGo = 0;
 
+		// displaying the original angle of the imu on the dash
+		double imuAngleFirst = imu.getAngle();
+		SmartDashboard.putNumber("Imu Angle Original", imuAngleFirst);
+
+		// angle we need to turn to for tower
+		desiredDegrees = 30;
 	}
 
 	/**
@@ -182,14 +189,25 @@ public class Robot extends IterativeRobot {
 		 * forwards half speed autoLoopCounter++; } else { myRobot.drive(0.0,
 		 * 0.0); // stop robot }
 		 */
+
+		imuAngleCurrent = imu.getAngle();
+		double imuAngleDiffrence = imuAngleCurrent - imuAngleOriginal;
+
 		switch (myState) {
 		case MoveToX:
 
 			if (encoder.getDistance() > 10) {
 				drive.stop();
+
 				myState = AutonomousState.TrunToTower;
+
 			} else {
-				drive.driveForward(.5);
+				if (imuAngleDiffrence > 0) {
+					drive.turnLeft(0.2);
+				} else if (imuAngleDiffrence < 0) {
+					drive.turnRight(.2);
+				} else
+					drive.driveForward(.5);
 			}
 
 			// Have I turned?
@@ -200,11 +218,24 @@ public class Robot extends IterativeRobot {
 
 			break;
 		case TrunToTower:
+
+			if (desiredDegrees == imuAngleCurrent) {
+				drive.stop();
+				myState = AutonomousState.MoveToTower;
+			} else {
+				if (imuAngleCurrent < desiredDegrees)
+					drive.turnRight(0.2);
+			}
+			if(imuAngleCurrent > desiredDegrees) {
+				drive.turnLeft(.2);
+			}
+		
 			// Have I turned enough?
 			// If yes. myState = MoveToTower
 
 			break;
 		case MoveToTower:
+			
 			// Have I turned?
 			// How far have I gone?
 			// How far do I have to go?
