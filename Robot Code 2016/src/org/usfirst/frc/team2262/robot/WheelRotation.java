@@ -2,7 +2,7 @@ package org.usfirst.frc.team2262.robot;
 
 import edu.wpi.first.wpilibj.Encoder;
 
-public class WheelRotaion {
+public class WheelRotation {
 	private Encoder leftEncoder;
 	private Encoder rightEncoder;
 	
@@ -21,7 +21,7 @@ public class WheelRotaion {
 		this.rightEncoder = rightEncoder;
 	}
 	
-	public WheelRotaion(double wheelDiameter, double pulsePerRevolution){
+	public WheelRotation(double wheelDiameter, double pulsePerRevolution){
 		
 		leftEncoder = new Encoder(0,1);
 		rightEncoder = new Encoder(2,3);

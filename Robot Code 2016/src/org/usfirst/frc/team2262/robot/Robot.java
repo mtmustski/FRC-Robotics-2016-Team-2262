@@ -53,7 +53,7 @@ public class Robot extends IterativeRobot {
 	TapeMeasure tapeMeasure;
 
 	// adding encoder class
-	WheelRotaion encoder;
+	WheelRotation encoder;
 
 	// adding sensors
 
@@ -108,7 +108,7 @@ public class Robot extends IterativeRobot {
 		smartDashboard = new SmartDashboard();
 
 		// resetting encoders
-		encoder = new WheelRotaion(6, 360);
+		encoder = new WheelRotation(6, 360);
 
 		// Initialing imu
 		imu = new ADIS16448_IMU();
@@ -226,16 +226,16 @@ public class Robot extends IterativeRobot {
 				if (imuAngleCurrent < desiredDegrees)
 					drive.turnRight(0.2);
 			}
-			if(imuAngleCurrent > desiredDegrees) {
+			if (imuAngleCurrent > desiredDegrees) {
 				drive.turnLeft(.2);
 			}
-		
+
 			// Have I turned enough?
 			// If yes. myState = MoveToTower
 
 			break;
 		case MoveToTower:
-			
+
 			// Have I turned?
 			// How far have I gone?
 			// How far do I have to go?
@@ -299,6 +299,26 @@ public class Robot extends IterativeRobot {
 	 */
 	public void testPeriodic() {
 		LiveWindow.run();
+
+		// drive
+		drive.driveMotion();
+
+		// arm
+		arm.ballIntake(controller.getRawButton(controllerMapping.leftBumper));
+		arm.ballOutput(controller.getRawButton(controllerMapping.rightBumper));
+		arm.elbowMotion(controller.getRawAxis(controllerMapping.triggers));
+		arm.rollerMotion(controller.getRawButton(controllerMapping.buttonX),
+				controller.getRawButton(controllerMapping.buttonB));
+
+		// tape measure
+		tapeMeasure.pushUp(controller.getRawButton(controllerMapping.buttonY));
+		tapeMeasure.pullDown(controller.getRawButton(controllerMapping.buttonA));
+		
+		//smart dashboard diagnostics
+		smartDashboard.putNumber("Front Left PWM", drive.frontLeft.get());
+		smartDashboard.putNumber("Rear Left PWM", drive.rearLeft.get());
+		smartDashboard.putNumber("Front Right PWM", drive.frontRight.get());
+		smartDashboard.putNumber("Rear Right PWM", drive.rearRight.get());
 
 	}
 
