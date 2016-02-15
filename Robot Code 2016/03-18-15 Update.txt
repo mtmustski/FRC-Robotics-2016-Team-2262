@@ -453,7 +453,11 @@ public class Robot extends IterativeRobot {
 		System.out.println("Encoder Rear Right Speed:  " + encoderRearRight.getRate());
 		System.out.println("samplesToAverage: " + samplesToAverage);*/
 		SmartDashboard.putNumber("time", timeFinal);
-		SmartDashboard.putNumber("Encoder Arm", encoderArm.getDistance());
+		
+
+
+
+Dashboard.putNumber("Encoder Arm", encoderArm.getDistance());
 	    SmartDashboard.putNumber("Encoder Lift", encoderLift.getDistance());
 		SmartDashboard.putNumber("Encoder Front Left Speed", Math.abs(frontLeftSpeed));
 		SmartDashboard.putNumber("Encoder Front Right Speed", Math.abs(frontRightSpeed));

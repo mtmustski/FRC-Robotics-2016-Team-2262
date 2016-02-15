@@ -3,9 +3,10 @@ package org.usfirst.frc.team2262.robot;
 public class ControllerMapping {
 
 	// axes (all output is between -1 and 1)
-	public int leftX = 1; // left: - ; right: +
-	public int leftY = 2; // up: - ; down: +
-	public int triggers = 3; // left: + ; right: -
+	public int leftX = 0; // left: - ; right: +
+	public int leftY = 1; // up: - ; down: +
+	public int leftTrigger = 2; 
+	public int rightTrigger = 3;
 	public int rightX = 4; // left: - ; right: +
 	public int rightY = 5; // up: - ; down: +
 	public int dPad = 6; // left-right; not recommended, buggy

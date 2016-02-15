@@ -114,6 +114,7 @@ public class ADIS16448_IMU extends GyroBase implements Gyro, PIDSource, LiveWind
     m_spi.setClockActiveLow();
     m_spi.setChipSelectActiveLow();
 
+    System.out.println("ADIS16448_IMU.java");
     readRegister(kRegPROD_ID); // dummy read
     
     // Validate the part ID

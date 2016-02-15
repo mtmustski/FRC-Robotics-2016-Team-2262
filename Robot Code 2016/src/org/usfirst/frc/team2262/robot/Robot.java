@@ -1,13 +1,15 @@
 package org.usfirst.frc.team2262.robot;
 
 import edu.wpi.first.wpilibj.IterativeRobot;
+
+//import adis16448.frc.ADIS16448_IMU;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.RobotDrive;
 import edu.wpi.first.wpilibj.livewindow.LiveWindow;
-import edu.wpi.first.wpilibj.CameraServer;
+//import edu.wpi.first.wpilibj.CameraServer;
 //import edu.wpi.first.wpilibj.Encoder;
-import edu.wpi.first.wpilibj.Ultrasonic;
-import edu.wpi.first.wpilibj.DigitalInput;
+//import edu.wpi.first.wpilibj.Ultrasonic;
+//import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.smartdashboard.*;
 
 /**
@@ -20,70 +22,19 @@ import edu.wpi.first.wpilibj.smartdashboard.*;
 public class Robot extends IterativeRobot {
 	RobotDrive myRobot;
 
-	/*
-	 * // adding CAN Talons for drive motors
-	 * 
-	 * 
-	 * driveMotorClass = new DriveMotor(front, back); DriveMotor leftDrive;
-	 * DriveMotor rightDrive;
-	 * 
-	 * 
-	 * 
-	 * TalonSRX frontLeft; TalonSRX rearLeft; TalonSRX frontRight; TalonSRX
-	 * rearRight;
-	 * 
-	 * 
-	 * 
-	 * adding victors for arm Talon elbow; Talon roller;
-	 * 
-	 * 
-	 * 
-	 * adding victors for Tape Measure Talon frictionWheel; Talon backClimber;
-	 * Talon frontClimber;
-	 * 
-	 */
-
-	// adding drive class
 	Drive drive;
 
-	// adding arm class
-	Arm arm;
-
-	// adding tape measure class
-	TapeMeasure tapeMeasure;
-
-	// adding encoder class
-	WheelRotation encoder;
-
-	// adding sensors
-
-	Ultrasonic ultrasonic;
-
-	DigitalInput limitSwitchTop;
-	DigitalInput limitSwitchBottom;
-
-	// declaring imu
 	ADIS16448_IMU imu;
 	int autoLoopCounter;
+	Arm arm;
 
-	// declaring encoder distancePerPulse
-	double distancePerPulse;
-
-	// declare smartdashboard
-	SmartDashboard smartDashboard;
-
-	// adding camera
-	CameraServer server;
-
-	/*
-	 * adding joystick Joystick joystick;
-	 */
-
-	// adding xbox 360 controller
 	Joystick controller;
 
-	// adding xbox controller mapping
 	ControllerMapping controllerMapping;
+
+	TapeMeasure tapeMeasure;
+
+	WheelRotation encoder;
 
 	// Autonomous variables.
 	int distance = 20;
@@ -105,62 +56,24 @@ public class Robot extends IterativeRobot {
 	 */
 	public void robotInit() {
 		// initialize smartDashboard:
-		smartDashboard = new SmartDashboard();
-
-		// resetting encoders
-		encoder = new WheelRotation(6, 360);
-
-		// Initialing imu
-		imu = new ADIS16448_IMU();
-
-		// calibrating the imu DO NOT TOUCH ROBIT!!!
-		imu.calibrate();
-
-		// initializing drive class
 		drive = new Drive(0, 1, 2, 3, 0);
 
-		// initializing arm class
+		imu = new ADIS16448_IMU();
+
+		imu.calibrate();
+
 		arm = new Arm(0, 1, 8, 9);
 
-		// initializing tape measure class
-		tapeMeasure = new TapeMeasure(2, 3, 4);
-
-		// creating new instance of xboxController
 		controller = new Joystick(1);
 
-		// creating new instance of controllerMapping
 		controllerMapping = new ControllerMapping();
 
-		/*
-		 * creating new instance of joystick joystick = new Joystick(0);
-		 */
+		tapeMeasure = new TapeMeasure(2, 3, 4);
 
-		// camera
-		server = CameraServer.getInstance();
-		server.setQuality(50);
-		// the camera name (ex "cam0") can be found through the roborio web
-		// interface
-		server.startAutomaticCapture("cam0");
+		encoder = new WheelRotation(6, 360);
 
-		// initializing drive motors
-
-		/*
-		 * leftDrive = new DriveMotor(0, 1); rightDrive = new DriveMotor(2, 3);
-		 */
-
-		/*
-		 * frontLeft = new TalonSRX(0); rearLeft = new TalonSRX(1); frontRight =
-		 * new TalonSRX(2); rearRight = new TalonSRX(3);
-		 *
-		 * initializing RobotDrive myRobot = new RobotDrive(frontLeft, rearLeft,
-		 * frontRight, rearRight);
-		 */
-
-		/*
-		 * //initializing arm motors elbow = new Talon(0); armRoller = new
-		 * Talon(1);
-		 */
-
+		// declaring encoder distancePerPulse
+		double distancePerPulse;
 	}
 
 	/**
@@ -279,19 +192,91 @@ public class Robot extends IterativeRobot {
 	 */
 	public void teleopPeriodic() {
 
-		// drive
 		drive.driveMotion();
 
-		// arm
-		arm.ballIntake(controller.getRawButton(controllerMapping.leftBumper));
-		arm.ballOutput(controller.getRawButton(controllerMapping.rightBumper));
-		arm.elbowMotion(controller.getRawAxis(controllerMapping.triggers));
-		arm.rollerMotion(controller.getRawButton(controllerMapping.buttonX),
-				controller.getRawButton(controllerMapping.buttonB));
+		// arm code
+		boolean leftBumper = controller.getRawButton(controllerMapping.leftBumper);
+		boolean rightBumper = controller.getRawButton(controllerMapping.rightBumper);
+		double leftTrigger = controller.getRawAxis(controllerMapping.leftTrigger);
+		double rightTrigger = controller.getRawAxis(controllerMapping.rightTrigger);
+		boolean buttonX = controller.getRawButton(controllerMapping.buttonX);
+		boolean buttonB = controller.getRawButton(controllerMapping.buttonB);
 
-		// tape measure
+		if (leftBumper == true) {
+			arm.ballIntake(leftBumper);
+		}
+
+		if (rightBumper == true) {
+			arm.ballOutput(rightBumper);
+		}
+
+		if (leftTrigger != 0.0 || rightTrigger != 0.0) {
+			arm.elbowMotion(leftTrigger, rightTrigger);
+		}
+
+		if (buttonX == true || buttonB == true) {
+			arm.rollerMotion(buttonX, buttonB);
+		}
+
+		if (!(leftBumper || rightBumper || leftTrigger != 0 || rightTrigger != 0 || buttonX || buttonB)) {
+			arm.elbow.set(0);
+			arm.roller.set(0);
+		}
+
+		// arm.ballIntake(controller.getRawButton(controllerMapping.leftBumper));
+		// arm.ballOutput(controller.getRawButton(controllerMapping.rightBumper));
+		// arm.elbowMotion(controller.getRawAxis(controllerMapping.triggers));
+		// arm.rollerMotion(controller.getRawButton(controllerMapping.buttonX),
+		// controller.getRawButton(controllerMapping.buttonB));
+
+		// tape measure code
+		boolean buttonY = controller.getRawButton(controllerMapping.buttonY);
+		boolean buttonA = controller.getRawButton(controllerMapping.buttonA);
+
+		if (buttonY) {
+			tapeMeasure.pushUp(buttonY);
+		}
+
+		if (buttonA) {
+			tapeMeasure.pullDown(buttonA);
+		}
+
+		if (!(buttonY || buttonX)) {
+			tapeMeasure.frictionWheel.set(0);
+			tapeMeasure.frontClimber.set(0);
+			tapeMeasure.rearClimber.set(0);
+		}
+
+		imu.getAngle();
+
 		tapeMeasure.pushUp(controller.getRawButton(controllerMapping.buttonY));
 		tapeMeasure.pullDown(controller.getRawButton(controllerMapping.buttonA));
+
+		SmartDashboard.putNumber("IMU X Angle", imu.getAngleX());
+		SmartDashboard.putNumber("IMU Y Angle", imu.getAngleY());
+		SmartDashboard.putNumber("IMU Z Angle", imu.getAngleZ());
+
+		SmartDashboard.putNumber("Front Left CAN", drive.frontLeft.get());
+		SmartDashboard.putNumber("Rear Left CAN", drive.rearLeft.get());
+		SmartDashboard.putNumber("Front Right CAN", drive.frontRight.get());
+		SmartDashboard.putNumber("Rear Right CAN", drive.rearRight.get());
+
+		SmartDashboard.putNumber("Elbow PWM", arm.elbow.get());
+		SmartDashboard.putNumber("Roller PWM", arm.roller.get());
+
+		SmartDashboard.putNumber("Friction Wheel PWM", tapeMeasure.frictionWheel.get());
+		SmartDashboard.putNumber("Front Climber PWM", tapeMeasure.frontClimber.get());
+		SmartDashboard.putNumber("Rear Climber PWM", tapeMeasure.rearClimber.get());
+
+		SmartDashboard.putNumber("Left Trigger Value", controller.getRawAxis(controllerMapping.leftTrigger));
+		SmartDashboard.putNumber("Right Trigger Value", controller.getRawAxis(controllerMapping.rightTrigger));
+
+
+		// smartDashboard.("leftEncoder", encoder.getLeftEncoder());
+		// smartDashboard.putNumber("rightEncoder",
+		// tapeMeasure.rearClimber.get());
+
+		System.out.println("Robot.java");
 	}
 
 	/**
@@ -299,26 +284,6 @@ public class Robot extends IterativeRobot {
 	 */
 	public void testPeriodic() {
 		LiveWindow.run();
-
-		// drive
-		drive.driveMotion();
-
-		// arm
-		arm.ballIntake(controller.getRawButton(controllerMapping.leftBumper));
-		arm.ballOutput(controller.getRawButton(controllerMapping.rightBumper));
-		arm.elbowMotion(controller.getRawAxis(controllerMapping.triggers));
-		arm.rollerMotion(controller.getRawButton(controllerMapping.buttonX),
-				controller.getRawButton(controllerMapping.buttonB));
-
-		// tape measure
-		tapeMeasure.pushUp(controller.getRawButton(controllerMapping.buttonY));
-		tapeMeasure.pullDown(controller.getRawButton(controllerMapping.buttonA));
-		
-		//smart dashboard diagnostics
-		smartDashboard.putNumber("Front Left PWM", drive.frontLeft.get());
-		smartDashboard.putNumber("Rear Left PWM", drive.rearLeft.get());
-		smartDashboard.putNumber("Front Right PWM", drive.frontRight.get());
-		smartDashboard.putNumber("Rear Right PWM", drive.rearRight.get());
 
 	}
 

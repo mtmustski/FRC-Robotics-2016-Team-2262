@@ -2,6 +2,7 @@ package org.usfirst.frc.team2262.robot;
 
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.Talon;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 public class TapeMeasure {
 
@@ -14,7 +15,7 @@ public class TapeMeasure {
 		frictionWheel = new Talon(frictionWheelChannel);
 		frontClimber = new Talon(frontClimberChannel);
 		rearClimber = new Talon(rearClimberChannel);
-
+		
 	}
 
 	public void pushUp(boolean pushUpButton) {
@@ -26,10 +27,7 @@ public class TapeMeasure {
 			frictionWheel.set(frictionWheelPushSpeed);
 			frontClimber.set(climberPushSpeed);
 			rearClimber.set(climberPushSpeed);
-		} else
-			frictionWheel.set(0);
-		frontClimber.set(0);
-		rearClimber.set(0);
+		}
 	}
 
 	public void pullDown(boolean pullDownButton) {
@@ -41,10 +39,7 @@ public class TapeMeasure {
 			frictionWheel.set(frictionWheelPullSpeed);
 			frontClimber.set(climberPullSpeed);
 			rearClimber.set(climberPullSpeed);
-		} else
-			frictionWheel.set(0);
-		frontClimber.set(0);
-		rearClimber.set(0);
+		}
 	}
 
 }

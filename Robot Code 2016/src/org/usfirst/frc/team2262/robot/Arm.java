@@ -25,15 +25,13 @@ public class Arm {
 		double elbowIntakeSpeed = -0.15;
 		double rollerIntakeSpeed = -0.8;
 
-		if (limitSwitchBottom.get() && intakeButton) {
+		if (!limitSwitchBottom.get() && intakeButton) {
 			elbow.set(0);
 			roller.set(rollerIntakeSpeed);
 		} else if (intakeButton) {
 			elbow.set(elbowIntakeSpeed);
 			roller.set(rollerIntakeSpeed);
-		} else
-			elbow.set(0);
-		roller.set(0);
+		}
 	}
 
 	public void ballOutput(boolean outputButton) {
@@ -41,36 +39,36 @@ public class Arm {
 		double elbowOutputSpeed = 0.2;
 		double rollerOutputSpeed = 0.9;
 
-		if (limitSwitchTop.get() && outputButton) {
+		if (!limitSwitchTop.get() && outputButton) {
 			elbow.set(0);
 			roller.set(rollerOutputSpeed);
 		} else if (outputButton) {
 			elbow.set(elbowOutputSpeed);
 			roller.set(rollerOutputSpeed);
-		} else
-			elbow.set(0);
-		roller.set(0);
+		}
 	}
 
-	public void elbowMotion(double elbowTrigger) {
+	public void elbowMotion(double triggerDown, double triggerUp) {
 
 		double maxElbowSpeed = 0.3;
 
 		// elbow down
-		if (limitSwitchBottom.get() && elbowTrigger > 0) {
-			elbow.set(0);
-		} else if (elbowTrigger > 0) {
-			elbow.set(-elbowTrigger * maxElbowSpeed);
-		} else
-			elbow.set(0);
+		if (triggerDown > 0) {
+			if (!limitSwitchBottom.get()) {
+				elbow.set(0);
+			} else {
+				elbow.set(-triggerDown * maxElbowSpeed);
+			}
+		}
 
 		// elbow up
-		if (limitSwitchTop.get() && elbowTrigger < 0) {
-			elbow.set(0);
-		} else if (elbowTrigger < 0) {
-			elbow.set(-elbowTrigger * maxElbowSpeed);
-		} else
-			elbow.set(0);
+		if (triggerUp > 0) {
+			if (!limitSwitchTop.get()) {
+				elbow.set(0);
+			} else {
+				elbow.set(triggerUp * maxElbowSpeed);
+			}
+		}
 	}
 
 	public void rollerMotion(boolean rollerInButton, boolean rollerOutButton) {
@@ -79,13 +77,11 @@ public class Arm {
 
 		if (rollerInButton) {
 			roller.set(-maxRollerSpeed);
-		} else
-			roller.set(0);
+		}
 
 		if (rollerOutButton) {
 			roller.set(maxRollerSpeed);
-		} else
-			roller.set(0);
+		}
 	}
 
 }
