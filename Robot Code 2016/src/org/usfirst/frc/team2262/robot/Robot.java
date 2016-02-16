@@ -5,6 +5,7 @@ import edu.wpi.first.wpilibj.IterativeRobot;
 //import adis16448.frc.ADIS16448_IMU;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.RobotDrive;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.livewindow.LiveWindow;
 //import edu.wpi.first.wpilibj.CameraServer;
 //import edu.wpi.first.wpilibj.Encoder;
@@ -42,9 +43,13 @@ public class Robot extends IterativeRobot {
 	double imuAngleOriginal = 0;
 	double imuAngleCurrent = 0;
 	double desiredDegrees = 0;
+	long armLowerTimer = 0;
+	double timerStart = 0;
+	double elapsedTime = 0;
+	
 
 	enum AutonomousState {
-		MoveToX, TrunToTower, MoveToTower, Aim, Shoot, Done
+		LowerArm, MoveToX, TurnToTower, MoveToTower, Aim, Shoot, Done
 	};
 
 	AutonomousState myState = AutonomousState.MoveToX;
@@ -80,16 +85,22 @@ public class Robot extends IterativeRobot {
 	 * This function is run once each time the robot enters autonomous mode
 	 */
 	public void autonomousInit() {
+		
 		autoLoopCounter = 0;
 		distance = 20;
 		howFarToGo = 0;
-
+		armLowerTimer = 0;
+		
+		elapsedTime = 0;
+		timerStart = Timer.getFPGATimestamp(); 
+		
+		
 		// displaying the original angle of the imu on the dash
 		double imuAngleFirst = imu.getAngle();
 		SmartDashboard.putNumber("Imu Angle Original", imuAngleFirst);
 
 		// angle we need to turn to for tower
-		desiredDegrees = 30;
+		desiredDegrees = 60;
 	}
 
 	/**
@@ -102,17 +113,27 @@ public class Robot extends IterativeRobot {
 		 * forwards half speed autoLoopCounter++; } else { myRobot.drive(0.0,
 		 * 0.0); // stop robot }
 		 */
-
+		
 		imuAngleCurrent = imu.getAngle();
 		double imuAngleDiffrence = imuAngleCurrent - imuAngleOriginal;
-
+		
+		elapsedTime = Timer.getFPGATimestamp() - timerStart; 
+		
 		switch (myState) {
+		case LowerArm:
+	
+			if(elapsedTime < .5){
+				arm.elbowMotion(.2, 0);
+			}else
+				myState = AutonomousState.MoveToX;
+				
+			break;
 		case MoveToX:
 
-			if (encoder.getDistance() > 10) {
+			if (encoder.getDistance() > 220.75) {
 				drive.stop();
 
-				myState = AutonomousState.TrunToTower;
+				myState = AutonomousState.TurnToTower;
 
 			} else {
 				if (imuAngleDiffrence > 0) {
@@ -130,7 +151,7 @@ public class Robot extends IterativeRobot {
 			// If yes. myState = TurnToTower;
 
 			break;
-		case TrunToTower:
+		case TurnToTower:
 
 			if (desiredDegrees == imuAngleCurrent) {
 				drive.stop();
@@ -162,12 +183,19 @@ public class Robot extends IterativeRobot {
 			// If no.
 			// Need to trun left? if so turn
 			// Need to Turn right? if so turn
-
+			timerStart = Timer.getFPGATimestamp(); 
 			break;
 		case Shoot:
+			
+			
 			// Shoot;
+			
+			if(elapsedTime < .3){
+				arm.ballOutput(true);	
+			}
+			
 			myState = AutonomousState.Done;
-
+			break;
 		case Done:
 			// flash lights.
 			// Sound horn.
