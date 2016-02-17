@@ -78,7 +78,7 @@ public class Robot extends IterativeRobot {
 		encoder = new WheelRotation(6, 360);
 
 		// declaring encoder distancePerPulse
-		double distancePerPulse;
+		//double distancePerPulse;
 	}
 
 	/**
@@ -298,6 +298,12 @@ public class Robot extends IterativeRobot {
 
 		SmartDashboard.putNumber("Left Trigger Value", controller.getRawAxis(controllerMapping.leftTrigger));
 		SmartDashboard.putNumber("Right Trigger Value", controller.getRawAxis(controllerMapping.rightTrigger));
+		
+		SmartDashboard.putNumber("Left Encoder Rate", encoder.getLeftEncoder().getRate());
+		SmartDashboard.putNumber("Right Encoder Rate", encoder.getRightEncoder().getRate());
+		
+		SmartDashboard.putNumber("Left Encoder Distance", encoder.getLeftEncoder().getDistance());
+		SmartDashboard.putNumber("Right Encoder Distance", encoder.getRightEncoder().getDistance());
 
 
 		// smartDashboard.("leftEncoder", encoder.getLeftEncoder());

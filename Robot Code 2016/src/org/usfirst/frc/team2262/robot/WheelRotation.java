@@ -6,7 +6,7 @@ public class WheelRotation {
 	private Encoder leftEncoder;
 	private Encoder rightEncoder;
 	
-	double distancePerPulse;  
+	double inchesPerPulse;  
 	
 	public Encoder getLeftEncoder() {
 		return leftEncoder;
@@ -21,15 +21,15 @@ public class WheelRotation {
 		this.rightEncoder = rightEncoder;
 	}
 	
-	public WheelRotation(double wheelDiameter, double pulsePerRevolution){
+	public WheelRotation(double wheelDiameter, double pulsesPerRevolution){
 		
-		leftEncoder = new Encoder(0,1);
-		rightEncoder = new Encoder(2,3);
+		leftEncoder = new Encoder(0, 1, false);
+		rightEncoder = new Encoder(2, 3, false);
 		
-		distancePerPulse = Math.PI*wheelDiameter/pulsePerRevolution; 
+		inchesPerPulse = Math.PI*wheelDiameter/pulsesPerRevolution; 
 		
-		leftEncoder.setDistancePerPulse(distancePerPulse);
-		rightEncoder.setDistancePerPulse(distancePerPulse);
+		leftEncoder.setDistancePerPulse(inchesPerPulse);
+		rightEncoder.setDistancePerPulse(inchesPerPulse);
 		
 		leftEncoder.reset();
 		rightEncoder.reset();	
