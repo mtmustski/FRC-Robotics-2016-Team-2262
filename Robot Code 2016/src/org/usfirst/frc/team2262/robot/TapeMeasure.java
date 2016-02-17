@@ -20,8 +20,8 @@ public class TapeMeasure {
 
 	public void pushUp(boolean pushUpButton) {
 
-		double frictionWheelPushSpeed = 0.25;
-		double climberPushSpeed = 0.5;
+		double frictionWheelPushSpeed = -0.4;
+		double climberPushSpeed = -0.8;
 
 		if (pushUpButton) {
 			frictionWheel.set(frictionWheelPushSpeed);
@@ -32,8 +32,8 @@ public class TapeMeasure {
 
 	public void pullDown(boolean pullDownButton) {
 
-		double frictionWheelPullSpeed = -0.4;
-		double climberPullSpeed = -0.8;
+		double frictionWheelPullSpeed = 0.3;
+		double climberPullSpeed = 0.6;
 
 		if (pullDownButton) {
 			frictionWheel.set(frictionWheelPullSpeed);

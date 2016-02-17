@@ -23,6 +23,12 @@ public class Drive {
 		rearLeft = new CANTalon(rearLeftChannel);
 		frontRight = new CANTalon(frontRightChannel);
 		rearRight = new CANTalon(rearRightChannel);
+		
+		frontLeft.setInverted(true);
+		rearLeft.setInverted(true);
+		frontRight.setInverted(true);
+		rearRight.setInverted(true);
+		
 
 		drive = new RobotDrive(frontLeft, rearLeft, frontRight, rearRight);
 
