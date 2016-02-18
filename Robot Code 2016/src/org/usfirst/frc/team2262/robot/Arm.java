@@ -23,7 +23,7 @@ public class Arm {
 	public void ballIntake(boolean intakeButton) {
 
 		double elbowIntakeSpeed = -0.15;
-		double rollerIntakeSpeed = -0.6;
+		double rollerIntakeSpeed = -0.4;
 
 		if (!limitSwitchBottom.get() && intakeButton) {
 			elbow.set(0);
@@ -36,8 +36,8 @@ public class Arm {
 
 	public void ballOutput(boolean outputButton) {
 
-		double elbowOutputSpeed = 0.2;
-		double rollerOutputSpeed = 0.3;
+		double elbowOutputSpeed = 0.1;
+		double rollerOutputSpeed = 0.9;
 
 		if (!limitSwitchTop.get() && outputButton) {
 			elbow.set(0);
@@ -73,7 +73,7 @@ public class Arm {
 
 	public void rollerMotion(boolean rollerInButton, boolean rollerOutButton) {
 
-		double maxRollerSpeed = 0.9;
+		double maxRollerSpeed = 0.75;
 
 		if (rollerInButton) {
 			roller.set(-maxRollerSpeed);
