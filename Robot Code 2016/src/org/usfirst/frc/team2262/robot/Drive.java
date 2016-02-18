@@ -70,7 +70,8 @@ public class Drive {
 
 	public void driveMotion() {
 
-		drive.arcadeDrive(joystick);
+		//rive.arcadeDrive(joystick);
+		drive.arcadeDrive(joystick, true);
 
 	}
 }
