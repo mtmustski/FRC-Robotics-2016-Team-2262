@@ -38,10 +38,10 @@ public class Drive {
 	}
 	
 	public void driveForward(double speed) {
-		frontLeft.set(speed);
-		rearLeft.set(speed);
-		frontRight.set(speed);
-		rearRight.set(speed);
+		frontLeft.set((double)-1* speed);
+		rearLeft.set((double)-1*speed);
+		frontRight.set((double)-1*speed);
+		rearRight.set((double)-1*speed);
 		
 	}
 	
@@ -53,18 +53,18 @@ public class Drive {
 	}
 	
 	public void turnRight(double speed){
-		frontLeft.set(speed);
-		rearLeft.set(speed);
-		frontRight.set((double)-1*speed);
-		rearRight.set((double)-1*speed);
-		
-	}
-	
-	public void turnLeft(double speed){
 		frontLeft.set((double)-1*speed);
 		rearLeft.set((double)-1*speed);
 		frontRight.set(speed);
 		rearRight.set(speed);
+		
+	}
+	
+	public void turnLeft(double speed){
+		frontLeft.set(speed);
+		rearLeft.set(speed);
+		frontRight.set((double)-1*speed);
+		rearRight.set((double)-1*speed);
 	}
 
 	public void driveMotion() {
