@@ -72,6 +72,46 @@ public class Drive {
 
 		//rive.arcadeDrive(joystick);
 		drive.arcadeDrive(joystick, true);
+		
+		
+		/*
+
+		double kVoltage=1.6;	//inc kVoltage: dec sensitivity & inc direction accuracy
+								//dec kVoltage: inc sensitivity & dec direction accuracy
+				!!! ACCELERATION MULTIPLIER
+
+		double encoderController(double desiredSpeed, double currentSpeed, double rawVoltage){
+		double voltage=0;
+		if(desiredSpeed>0.2){	!!! DESIRED SPEED IS THE MINIMUM STIMULUS AT WHICH THE ROBOT WOULD MOVE
+			if (desiredSpeed>currentSpeed){voltage=kVoltage*rawVoltage;}
+			if (desiredSpeed<currentSpeed){voltage=0;}
+		}
+		if(desiredSpeed<-0.2){
+			if (desiredSpeed<currentSpeed){voltage=kVoltage*rawVoltage;}
+			if (desiredSpeed>currentSpeed){voltage=0;}
+		}
+		if (voltage>1) {voltage=1;}
+		if (voltage<-1) {voltage=-1;}
+		return voltage;
+		
+		
+		double maxRateOfChange=.01;		//time delay constant between full back and full forward: .01=4seconds   .015=3seconds   .02=2seconds
+		
+		double lowPassFilter(double lastOutputToEsc, double currentOutputToEsc){
+		if (Math.abs(currentOutputToEsc-lastOutputToEsc)>maxRateOfChange){
+			if (currentOutputToEsc>lastOutputToEsc){currentOutputToEsc=lastOutputToEsc+maxRateOfChange;} 
+			else if (currentOutputToEsc<lastOutputToEsc){currentOutputToEsc=lastOutputToEsc-maxRateOfChange;}
+		}
+		return currentOutputToEsc;
+		!!! LIMITS THE MAXIMUM ACCELERATION
+
+
+		outputToEscFL=lowPassFilter(outputToEscFL, encoderController(frontLeft*driveTopSpeed, frontLeftSpeed, frontLeft));
+    	outputToEscFR=lowPassFilter(outputToEscFR, encoderController(-frontRight*driveTopSpeed, frontRightSpeed, -frontRight));
+    	outputToEscRL=lowPassFilter(outputToEscRL, encoderController(rearLeft*driveTopSpeed, rearLeftSpeed, rearLeft));
+    	outputToEscRR=lowPassFilter(outputToEscRR, encoderController(-rearRight*driveTopSpeed, rearRightSpeed, -rearRight));
+    	 	
+    	*/
 
 	}
 }
