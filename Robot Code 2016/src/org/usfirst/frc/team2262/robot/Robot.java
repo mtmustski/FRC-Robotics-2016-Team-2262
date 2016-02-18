@@ -1,5 +1,6 @@
 package org.usfirst.frc.team2262.robot;
 
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.IterativeRobot;
 
 //import adis16448.frc.ADIS16448_IMU;
@@ -12,6 +13,7 @@ import edu.wpi.first.wpilibj.livewindow.LiveWindow;
 //import edu.wpi.first.wpilibj.Ultrasonic;
 //import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.smartdashboard.*;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;;
 
 /**
  * The VM is configured to automatically run this class, and to call the
@@ -22,6 +24,8 @@ import edu.wpi.first.wpilibj.smartdashboard.*;
  */
 public class Robot extends IterativeRobot {
 	RobotDrive myRobot;
+	
+	DriverStation.Alliance allianceColor;
 
 	Drive drive;
 
@@ -60,7 +64,8 @@ public class Robot extends IterativeRobot {
 	 * used for any initialization code.
 	 */
 	public void robotInit() {
-		// initialize smartDashboard:
+		allianceColor = DriverStation.getInstance().getAlliance();
+		
 		drive = new Drive(0, 1, 2, 3, 0);
 
 		imu = new ADIS16448_IMU();
@@ -304,6 +309,14 @@ public class Robot extends IterativeRobot {
 		
 		SmartDashboard.putNumber("Left Encoder Distance", encoder.getLeftEncoder().getDistance());
 		SmartDashboard.putNumber("Right Encoder Distance", encoder.getRightEncoder().getDistance());
+		
+		if (allianceColor == DriverStation.Alliance.Blue) {
+			SmartDashboard.putString("Alliance Color", "Blue");
+		}
+		
+		if (allianceColor == DriverStation.Alliance.Red) {
+			SmartDashboard.putString("Alliance Color", "Red");
+		}
 
 
 		// smartDashboard.("leftEncoder", encoder.getLeftEncoder());

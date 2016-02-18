@@ -9,7 +9,7 @@ public class Arm {
 	Talon roller;
 
 	DigitalInput limitSwitchTop;
-	DigitalInput limitSwitchBottom;
+	//DigitalInput limitSwitchBottom;
 
 	public Arm(int elbowChannel, int armRollerChannel, int topChannel, int bottomChannel) {
 
@@ -17,7 +17,7 @@ public class Arm {
 		roller = new Talon(armRollerChannel);
 
 		limitSwitchTop = new DigitalInput(topChannel);
-		limitSwitchBottom = new DigitalInput(bottomChannel);
+		//limitSwitchBottom = new DigitalInput(bottomChannel);
 	}
 
 	public void ballIntake(boolean intakeButton) {
@@ -25,10 +25,7 @@ public class Arm {
 		double elbowIntakeSpeed = -0.15;
 		double rollerIntakeSpeed = -0.4;
 
-		if (!limitSwitchBottom.get() && intakeButton) {
-			elbow.set(0);
-			roller.set(rollerIntakeSpeed);
-		} else if (intakeButton) {
+		if (intakeButton) {
 			elbow.set(elbowIntakeSpeed);
 			roller.set(rollerIntakeSpeed);
 		}
@@ -54,11 +51,7 @@ public class Arm {
 
 		// elbow down
 		if (triggerDown > 0) {
-			if (!limitSwitchBottom.get()) {
-				elbow.set(0);
-			} else {
 				elbow.set(-triggerDown * maxElbowSpeed);
-			}
 		}
 
 		// elbow up
