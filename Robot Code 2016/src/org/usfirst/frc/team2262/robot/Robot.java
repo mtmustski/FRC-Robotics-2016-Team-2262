@@ -310,7 +310,6 @@ public class Robot extends IterativeRobot {
 		// smartDashboard.putNumber("rightEncoder",
 		// tapeMeasure.rearClimber.get());
 
-		System.out.println("Robot.java");
 	}
 
 	/**

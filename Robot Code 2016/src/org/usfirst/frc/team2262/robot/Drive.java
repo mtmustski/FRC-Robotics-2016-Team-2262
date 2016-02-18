@@ -34,7 +34,6 @@ public class Drive {
 
 		joystick = new Joystick(joystickPort);
 		
-		System.out.println("Drive.java");
 
 	}
 	
