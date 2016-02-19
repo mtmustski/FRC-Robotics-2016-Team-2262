@@ -14,8 +14,27 @@ public class Drive {
 	RobotDrive drive;
 
 	Joystick joystick;
-
-
+	
+	WheelRotation encoder;
+	
+	//drive control variables
+	double rawLeftVoltage = 0;
+	double rawRightVoltage = 0;
+	double processedLeftVoltage = 0;
+	double processedRightVoltage = 0;
+	double outputLeftVoltage = 0;
+	double outputRightVoltage = 0;
+	
+	//drive control constants
+	double maxLeftSpeed = 68; //inches per second
+	double maxRightSpeed = 68;
+	
+	//drive control arrays
+	double[] rawVoltage = { 0 , 0 };
+	double[] processedVoltage = { 0 , 0 };
+	double[] outputVoltage = { 0 , 0 };
+	
+			
 	public Drive(int frontLeftChannel, int rearLeftChannel, int frontRightChannel, int rearRightChannel,
 			int joystickPort) {
 
@@ -34,7 +53,8 @@ public class Drive {
 
 		joystick = new Joystick(joystickPort);
 		
-
+		encoder = new WheelRotation (6, 360);
+		
 	}
 	
 	public void driveForward(double speed) {
@@ -66,51 +86,152 @@ public class Drive {
 		frontRight.set(speed);
 		rearRight.set(speed);
 	}
+	
+	public void directInputDrive() {
+		
+		drive.arcadeDrive(joystick, false);
+		
+	}
 
-	public void driveMotion() {
+	public void squaredInputDrive() {
 
-		//rive.arcadeDrive(joystick);
 		drive.arcadeDrive(joystick, true);
-		
-		
-		/*
-
-		double kVoltage=1.6;	//inc kVoltage: dec sensitivity & inc direction accuracy
-								//dec kVoltage: inc sensitivity & dec direction accuracy
-				!!! ACCELERATION MULTIPLIER
-
-		double encoderController(double desiredSpeed, double currentSpeed, double rawVoltage){
-		double voltage=0;
-		if(desiredSpeed>0.2){	!!! DESIRED SPEED IS THE MINIMUM STIMULUS AT WHICH THE ROBOT WOULD MOVE
-			if (desiredSpeed>currentSpeed){voltage=kVoltage*rawVoltage;}
-			if (desiredSpeed<currentSpeed){voltage=0;}
-		}
-		if(desiredSpeed<-0.2){
-			if (desiredSpeed<currentSpeed){voltage=kVoltage*rawVoltage;}
-			if (desiredSpeed>currentSpeed){voltage=0;}
-		}
-		if (voltage>1) {voltage=1;}
-		if (voltage<-1) {voltage=-1;}
-		return voltage;
-		
-		
-		double maxRateOfChange=.01;		//time delay constant between full back and full forward: .01=4seconds   .015=3seconds   .02=2seconds
-		
-		double lowPassFilter(double lastOutputToEsc, double currentOutputToEsc){
-		if (Math.abs(currentOutputToEsc-lastOutputToEsc)>maxRateOfChange){
-			if (currentOutputToEsc>lastOutputToEsc){currentOutputToEsc=lastOutputToEsc+maxRateOfChange;} 
-			else if (currentOutputToEsc<lastOutputToEsc){currentOutputToEsc=lastOutputToEsc-maxRateOfChange;}
-		}
-		return currentOutputToEsc;
-		!!! LIMITS THE MAXIMUM ACCELERATION
-
-
-		outputToEscFL=lowPassFilter(outputToEscFL, encoderController(frontLeft*driveTopSpeed, frontLeftSpeed, frontLeft));
-    	outputToEscFR=lowPassFilter(outputToEscFR, encoderController(-frontRight*driveTopSpeed, frontRightSpeed, -frontRight));
-    	outputToEscRL=lowPassFilter(outputToEscRL, encoderController(rearLeft*driveTopSpeed, rearLeftSpeed, rearLeft));
-    	outputToEscRR=lowPassFilter(outputToEscRR, encoderController(-rearRight*driveTopSpeed, rearRightSpeed, -rearRight));
-    	 	
-    	*/
 
 	}
+	
+	public void controlledInputDrive(){
+		
+		//for all arrays: 0 = left, 1 = right
+		rawVoltage = arcadeDrive();
+		processedVoltage = speedControl(rawVoltage[0] * maxLeftSpeed, rawVoltage[1] * maxRightSpeed, encoder.getLeftSpeed(), encoder.getRightSpeed(), rawVoltage[0], rawVoltage[1]);
+		outputVoltage = accelerationControl(outputVoltage[0], outputVoltage[1], processedVoltage[0], processedVoltage[1]);
+		
+		frontLeft.set(outputVoltage[0]);
+		rearLeft.set(outputVoltage[0]);
+		frontRight.set(outputVoltage[1]);
+		rearRight.set(outputVoltage[1]);
+		
+	}
+	
+	
+	private double[] arcadeDrive() {
+
+		double moveValue = joystick.getY();
+		double rotateValue = joystick.getX();
+
+		if (moveValue > 0.0) {
+			if (rotateValue > 0.0) {
+				rawLeftVoltage = moveValue - rotateValue;
+				rawRightVoltage = Math.max(moveValue, rotateValue);
+			} else {
+				rawLeftVoltage = Math.max(moveValue, -rotateValue);
+				rawRightVoltage = moveValue + rotateValue;
+			}
+		} else {
+			if (rotateValue > 0.0) {
+				rawLeftVoltage = -Math.max(-moveValue, rotateValue);
+				rawRightVoltage = moveValue + rotateValue;
+			} else {
+				rawLeftVoltage = moveValue - rotateValue;
+				rawRightVoltage = -Math.max(-moveValue, -rotateValue);
+			}
+		}
+		return new double[] { rawLeftVoltage, rawRightVoltage };
+
+	}
+
+	private double[] speedControl(double desiredLeftSpeed, double desiredRightSpeed, double currentLeftSpeed, double currentRightSpeed, double rawLeftVoltage, double rawRightVoltage) {
+		
+		double kSpeed = 1.8;
+		
+		if (desiredLeftSpeed != 0){
+			if (Math.abs(desiredLeftSpeed) > Math.abs(currentLeftSpeed)) {
+				processedLeftVoltage= kSpeed * rawLeftVoltage;
+				}
+			if (Math.abs(desiredLeftSpeed) < Math.abs(currentLeftSpeed)) {
+				processedLeftVoltage=0;
+				}
+		}
+		
+		if (desiredRightSpeed != 0){
+			if (Math.abs(desiredRightSpeed) > Math.abs(currentRightSpeed)) {
+				processedLeftVoltage= kSpeed * rawLeftVoltage;
+				}
+			if (Math.abs(desiredRightSpeed) < Math.abs(currentRightSpeed)) {
+				processedLeftVoltage=0;
+				}
+		}
+		return new double[] { processedLeftVoltage, processedRightVoltage };
+		
+	}
+	
+	private double[] accelerationControl (double previousLeftVoltage, double previousRightVoltage, double processedLeftVoltage, double processedRightVoltage) {
+		
+		double kMaxAcceleration = 0.025;  //time delay constant between full back and full forward: .01=4seconds   .015=3seconds   .02=2seconds ??
+		
+		if (Math.abs(processedLeftVoltage - previousLeftVoltage) > kMaxAcceleration){
+			if (processedLeftVoltage > previousLeftVoltage) {
+				outputLeftVoltage = previousLeftVoltage + kMaxAcceleration;
+				} 
+			if (processedLeftVoltage < previousLeftVoltage) {
+				outputLeftVoltage = previousLeftVoltage - kMaxAcceleration;
+				}
+		}	else {
+			outputLeftVoltage = processedLeftVoltage;
+		
+		}
+		
+		if (Math.abs(processedRightVoltage - previousRightVoltage) > kMaxAcceleration){
+			if (processedRightVoltage > previousRightVoltage) {
+				outputRightVoltage = previousRightVoltage + kMaxAcceleration;
+				} 
+			if (processedRightVoltage < previousRightVoltage) {
+				outputRightVoltage = previousRightVoltage - kMaxAcceleration;
+				}
+		}	else {
+			outputRightVoltage = processedRightVoltage;
+		}
+		return new double[] { outputLeftVoltage, outputRightVoltage };
+	
+	}
+
+	/*
+
+	double kVoltage=1.6;	//inc kVoltage: dec sensitivity & inc direction accuracy
+							//dec kVoltage: inc sensitivity & dec direction accuracy
+			!!! ACCELERATION MULTIPLIER
+
+	double encoderController(double desiredSpeed, double currentSpeed, double rawVoltage){
+	double voltage=0;
+	if(desiredSpeed>0.2){	!!! DESIRED SPEED IS THE MINIMUM STIMULUS AT WHICH THE ROBOT WOULD MOVE
+		if (desiredSpeed>currentSpeed){voltage=kVoltage*rawVoltage;}
+		if (desiredSpeed<currentSpeed){voltage=0;}
+	}
+	if(desiredSpeed<-0.2){
+		if (desiredSpeed<currentSpeed){voltage=kVoltage*rawVoltage;}
+		if (desiredSpeed>currentSpeed){voltage=0;}
+	}
+	if (voltage>1) {voltage=1;}
+	if (voltage<-1) {voltage=-1;}
+	return voltage;
+	
+	
+	double maxRateOfChange=.01;		//time delay constant between full back and full forward: .01=4seconds   .015=3seconds   .02=2seconds
+	
+	double lowPassFilter(double lastOutputToEsc, double currentOutputToEsc){
+	if (Math.abs(currentOutputToEsc-lastOutputToEsc)>maxRateOfChange){
+		if (currentOutputToEsc>lastOutputToEsc){currentOutputToEsc=lastOutputToEsc+maxRateOfChange;} 
+		else if (currentOutputToEsc<lastOutputToEsc){currentOutputToEsc=lastOutputToEsc-maxRateOfChange;}
+	}
+	return currentOutputToEsc;
+	!!! LIMITS THE MAXIMUM ACCELERATION
+
+
+	outputToEscFL=lowPassFilter(outputToEscFL, encoderController(frontLeft*driveTopSpeed, frontLeftSpeed, frontLeft));
+	outputToEscFR=lowPassFilter(outputToEscFR, encoderController(-frontRight*driveTopSpeed, frontRightSpeed, -frontRight));
+	outputToEscRL=lowPassFilter(outputToEscRL, encoderController(rearLeft*driveTopSpeed, rearLeftSpeed, rearLeft));
+	outputToEscRR=lowPassFilter(outputToEscRR, encoderController(-rearRight*driveTopSpeed, rearRightSpeed, -rearRight));
+	 	
+	*/
+	
 }

@@ -225,7 +225,9 @@ public class Robot extends IterativeRobot {
 	 */
 	public void teleopPeriodic() {
 
-		drive.driveMotion();
+		//drive.directInputDrive();
+		drive.squaredInputDrive();
+		//drive.controlledInputDrive();
 
 		// arm code
 		boolean leftBumper = controller.getRawButton(controllerMapping.leftBumper);

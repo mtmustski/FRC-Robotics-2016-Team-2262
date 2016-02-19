@@ -37,9 +37,19 @@ public class WheelRotation {
 		
 	}
 	
-	public double getDistance(){
+	public double getDistance() {
 		double distance = (leftEncoder.getDistance() + rightEncoder.getDistance()) / (double)2;
 		return distance;
+	}
+	
+	public double getLeftSpeed() {
+		double leftSpeed = leftEncoder.getRate(); //inches per second
+		return leftSpeed;
+	}
+	
+	public double getRightSpeed() {
+		double rightSpeed = rightEncoder.getRate(); //inches per second
+		return rightSpeed;
 	}
 	
 }
