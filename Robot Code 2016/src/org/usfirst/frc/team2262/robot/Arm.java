@@ -11,7 +11,7 @@ public class Arm {
 	DigitalInput limitSwitchTop;
 	//DigitalInput limitSwitchBottom;
 
-	public Arm(int elbowChannel, int armRollerChannel, int topChannel, int bottomChannel) {
+	public Arm(int elbowChannel, int armRollerChannel, int topChannel) {
 
 		elbow = new Talon(elbowChannel);
 		roller = new Talon(armRollerChannel);

@@ -72,7 +72,7 @@ public class Robot extends IterativeRobot {
 
 		imu.calibrate();
 
-		arm = new Arm(0, 1, 8, 9);
+		arm = new Arm(0, 1, 4);
 
 		controller = new Joystick(1);
 

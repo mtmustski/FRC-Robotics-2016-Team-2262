@@ -102,9 +102,9 @@ public class Drive {
 	public void controlledInputDrive(){
 		
 		//for all arrays: 0 = left, 1 = right
-		rawVoltage = arcadeDrive();
 		processedVoltage = speedControl(rawVoltage[0] * maxLeftSpeed, rawVoltage[1] * maxRightSpeed, encoder.getLeftSpeed(), encoder.getRightSpeed(), rawVoltage[0], rawVoltage[1]);
 		outputVoltage = accelerationControl(outputVoltage[0], outputVoltage[1], processedVoltage[0], processedVoltage[1]);
+		rawVoltage = arcadeDrive();
 		
 		frontLeft.set(outputVoltage[0]);
 		rearLeft.set(outputVoltage[0]);
@@ -144,23 +144,75 @@ public class Drive {
 		
 		double kSpeed = 1.8;
 		
-		if (desiredLeftSpeed != 0){
-			if (Math.abs(desiredLeftSpeed) > Math.abs(currentLeftSpeed)) {
-				processedLeftVoltage= kSpeed * rawLeftVoltage;
+		if (desiredLeftSpeed > 0) {
+			if (currentLeftSpeed >= 0) {
+				if (desiredLeftSpeed > currentLeftSpeed) {
+					processedLeftVoltage= kSpeed * rawLeftVoltage;
 				}
-			if (Math.abs(desiredLeftSpeed) < Math.abs(currentLeftSpeed)) {
+				if (desiredLeftSpeed < currentLeftSpeed) {
+					processedLeftVoltage=0;
+				}
+			}
+			if (currentLeftSpeed < 0) {
 				processedLeftVoltage=0;
-				}
+			}
 		}
 		
-		if (desiredRightSpeed != 0){
-			if (Math.abs(desiredRightSpeed) > Math.abs(currentRightSpeed)) {
-				processedLeftVoltage= kSpeed * rawLeftVoltage;
+		if (desiredLeftSpeed < 0) {
+			if (currentLeftSpeed <= 0) {
+				if (desiredLeftSpeed < currentLeftSpeed) {
+					processedLeftVoltage= kSpeed * rawLeftVoltage;
 				}
-			if (Math.abs(desiredRightSpeed) < Math.abs(currentRightSpeed)) {
+				if (desiredLeftSpeed > currentLeftSpeed) {
+					processedLeftVoltage=0;
+				}
+			}
+			if (currentLeftSpeed > 0) {
 				processedLeftVoltage=0;
-				}
+			}
 		}
+		
+		if (desiredLeftSpeed > 0) {
+			if (currentRightSpeed >= 0) {
+				if (desiredRightSpeed > currentRightSpeed) {
+					processedRightVoltage= kSpeed * rawRightVoltage;
+				}
+				if (desiredRightSpeed < currentRightSpeed) {
+					processedRightVoltage=0;
+				}
+			}
+			if (currentRightSpeed < 0) {
+				processedRightVoltage=0;
+			}
+		}
+		
+		if (desiredRightSpeed < 0) {
+			if (currentRightSpeed <= 0) {
+				if (desiredRightSpeed < currentRightSpeed) {
+					processedRightVoltage= kSpeed * rawRightVoltage;
+				}
+				if (desiredRightSpeed > currentRightSpeed) {
+					processedRightVoltage=0;
+				}
+			}
+			if (currentRightSpeed > 0) {
+				processedRightVoltage=0;
+			}
+		}
+		
+		if (processedLeftVoltage > 1) {
+			processedLeftVoltage = 1;
+		}
+		if (processedLeftVoltage < -1) {
+			processedLeftVoltage = -1;
+		}
+		if (processedRightVoltage > 1) {
+			processedRightVoltage = 1;
+		}
+		if (processedRightVoltage < -1) {
+			processedRightVoltage = -1;
+		}
+		
 		return new double[] { processedLeftVoltage, processedRightVoltage };
 		
 	}
