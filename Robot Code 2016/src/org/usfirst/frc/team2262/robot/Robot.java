@@ -127,8 +127,8 @@ public class Robot extends IterativeRobot {
 		switch (myState) {
 		case LowerArm:
 	
-			if(elapsedTime < .5){
-				arm.elbowMotion(-0.2, 0);
+			if(elapsedTime < 3){
+				arm.elbowMotion(0.2, 0);
 			}else
 				myState = AutonomousState.MoveToX;
 				
