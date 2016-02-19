@@ -56,7 +56,7 @@ public class Robot extends IterativeRobot {
 		LowerArm, MoveToX, TurnToTower, MoveToTower, Aim, Shoot, Done
 	};
 
-	AutonomousState myState = AutonomousState.MoveToX;
+	AutonomousState myState = AutonomousState.LowerArm;
 	double direction = 0.0;
 
 	/**
