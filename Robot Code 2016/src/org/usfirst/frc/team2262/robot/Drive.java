@@ -26,8 +26,8 @@ public class Drive {
 	double outputRightVoltage = 0;
 	
 	//drive control constants
-	double maxLeftSpeed = 68; //inches per second
-	double maxRightSpeed = 68;
+	double maxLeftSpeed = 88; //inches per second
+	double maxRightSpeed = 88;
 	
 	//drive control arrays
 	double[] rawVoltage = { 0 , 0 };
