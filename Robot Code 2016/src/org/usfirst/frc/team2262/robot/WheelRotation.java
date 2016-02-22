@@ -51,5 +51,9 @@ public class WheelRotation {
 		double rightSpeed = rightEncoder.getRate(); //inches per second
 		return rightSpeed;
 	}
+	public void reset(){
+		leftEncoder.reset();
+		rightEncoder.reset();
+	}
 	
 }

@@ -8,6 +8,7 @@ import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.RobotDrive;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.livewindow.LiveWindow;
+import edu.wpi.first.wpilibj.networktables.NetworkTable;
 //import edu.wpi.first.wpilibj.CameraServer;
 //import edu.wpi.first.wpilibj.Encoder;
 //import edu.wpi.first.wpilibj.Ultrasonic;
@@ -24,12 +25,23 @@ import edu.wpi.first.wpilibj.DriverStation.Alliance;;
  */
 public class Robot extends IterativeRobot {
 	RobotDrive myRobot;
-	
+
+	// ip address of pie
+	// 10.22.62.15
+
+	NetworkTable table;
+	double centerXValue;
+
+	public Robot() {
+		table = NetworkTable.getTable("GRIP/myContoursReport");
+	}
+
 	DriverStation.Alliance allianceColor;
 
 	Drive drive;
 
 	ADIS16448_IMU imu;
+
 	int autoLoopCounter;
 	Arm arm;
 
@@ -50,28 +62,32 @@ public class Robot extends IterativeRobot {
 	long armLowerTimer = 0;
 	double timerStart = 0;
 	double elapsedTime = 0;
-	
+	double angleFudgeFactor = 0;
+	double driveForwardSpeed = 0;
+	double driveTurnSpeed = 0;
 
 	enum AutonomousState {
-		LowerArm, MoveToX, TurnToTower, MoveToTower, Aim, Shoot, Done
+		LowerArm, MoveOverLowBar, TurnToTower, MoveToTower, Aim, Shoot, Done, MoveToX
 	};
 
 	AutonomousState myState = AutonomousState.LowerArm;
-	double direction = 0.0;
 
 	/**
 	 * This function is run when the robot is first started up and should be
 	 * used for any initialization code.
 	 */
 	public void robotInit() {
+
 		allianceColor = DriverStation.getInstance().getAlliance();
-		
+
 		drive = new Drive(0, 1, 2, 3, 0);
 
 		imu = new ADIS16448_IMU();
 
 		imu.calibrate();
 
+		
+		
 		arm = new Arm(0, 1, 4);
 
 		controller = new Joystick(1);
@@ -80,32 +96,39 @@ public class Robot extends IterativeRobot {
 
 		tapeMeasure = new TapeMeasure(2, 3, 4);
 
-		encoder = new WheelRotation(6, 360);
+		encoder = new WheelRotation(6, 2035);
 
 		// declaring encoder distancePerPulse
-		//double distancePerPulse;
+		// double distancePerPulse;
 	}
 
 	/**
 	 * This function is run once each time the robot enters autonomous mode
 	 */
 	public void autonomousInit() {
-		
+		// imu.calibrate();
+		myState = AutonomousState.LowerArm;
 		autoLoopCounter = 0;
 		distance = 20;
 		howFarToGo = 0;
 		armLowerTimer = 0;
-		
+
 		elapsedTime = 0;
-		timerStart = Timer.getFPGATimestamp(); 
-		
-		
+		timerStart = Timer.getFPGATimestamp();
+
+		encoder.reset();
 		// displaying the original angle of the imu on the dash
-		double imuAngleFirst = imu.getAngle();
-		SmartDashboard.putNumber("Imu Angle Original", imuAngleFirst);
+
+		imuAngleOriginal = imu.getAngleZ();
+		SmartDashboard.putNumber("Imu Angle Original", imuAngleOriginal);
 
 		// angle we need to turn to for tower
 		desiredDegrees = 60;
+
+		angleFudgeFactor = 7;
+
+		driveForwardSpeed = .5;
+		driveTurnSpeed = .2;
 	}
 
 	/**
@@ -118,35 +141,50 @@ public class Robot extends IterativeRobot {
 		 * forwards half speed autoLoopCounter++; } else { myRobot.drive(0.0,
 		 * 0.0); // stop robot }
 		 */
-		
-		imuAngleCurrent = imu.getAngle();
+
+		double[] defaultValue = new double[0];
+		centerXValue = 100.0;
+		boolean  foundTarget  = false;
+		double[] centerX = table.getNumberArray("centerX", defaultValue);
+		for (double d : centerX) {
+			centerXValue = d;
+			foundTarget = true;
+		}
+
+		imuAngleCurrent = imu.getAngleZ();
+		SmartDashboard.putDouble("Imu Angle Current", imuAngleCurrent);
 		double imuAngleDiffrence = imuAngleCurrent - imuAngleOriginal;
-		
-		elapsedTime = Timer.getFPGATimestamp() - timerStart; 
-		
+		SmartDashboard.putDouble("Imu Angle Diffrence", imuAngleDiffrence);
+		elapsedTime = Timer.getFPGATimestamp() - timerStart;
+		SmartDashboard.putDouble("Average Encoder Distance", encoder.getDistance());
+
 		switch (myState) {
 		case LowerArm:
-	
-			if(elapsedTime < 3){
-				arm.elbowMotion(0.2, 0);
-			}else
-				myState = AutonomousState.MoveToX;
-				
+			SmartDashboard.putString("Auto Case", "Lower Arm");
+			if (elapsedTime < .68) {
+				arm.elbowMotion(1, 0);
+			} else {
+				arm.elbowMotion(-1, -1);
+				myState = AutonomousState.MoveOverLowBar;
+			}
 			break;
-		case MoveToX:
+		case MoveOverLowBar:
 
-			if (encoder.getDistance() > 220.75) {
+			SmartDashboard.putString("Auto Case", "Move Over Low Bar");
+			if (encoder.getDistance() > 19.5) { // 19.5" is distance from start
+												// to over lowgaol? ask trevor
 				drive.stop();
-
-				myState = AutonomousState.TurnToTower;
+				encoder.reset();
+				myState = AutonomousState.MoveToX;
 
 			} else {
-				if (imuAngleDiffrence > 0) {
-					drive.turnLeft(0.2);
-				} else if (imuAngleDiffrence < 0) {
-					drive.turnRight(.2);
+				if (imuAngleDiffrence > angleFudgeFactor) {
+
+					drive.turnLeft(driveTurnSpeed);
+				} else if (imuAngleDiffrence < angleFudgeFactor) {
+					drive.turnRight(driveTurnSpeed);
 				} else
-					drive.driveForward(.5);
+					drive.driveForward(driveForwardSpeed);
 			}
 
 			// Have I turned?
@@ -156,52 +194,106 @@ public class Robot extends IterativeRobot {
 			// If yes. myState = TurnToTower;
 
 			break;
-		case TurnToTower:
+		case MoveToX:
+			SmartDashboard.putString("Auto Case", "Move To X");
+			if (encoder.getDistance() > 20.75) { // 220.75 distance from after
+													// lowgaol to turn area ask
+													// trevor
+				drive.stop();
 
-			if (desiredDegrees == imuAngleCurrent) {
+				myState = AutonomousState.TurnToTower;
+
+			} else {
+				if (imuAngleDiffrence > angleFudgeFactor) {
+					drive.turnLeft(driveTurnSpeed);
+				} else if (imuAngleDiffrence < angleFudgeFactor) {
+					drive.turnRight(driveTurnSpeed);
+				} else
+					drive.driveForward(driveForwardSpeed);
+			}
+			break;
+		case TurnToTower:
+			SmartDashboard.putString("Auto Case", "Turn To Tower");
+			if (Math.abs(imuAngleDiffrence - desiredDegrees) < 1) {
+
 				drive.stop();
 				myState = AutonomousState.MoveToTower;
 			} else {
-				if (imuAngleCurrent < desiredDegrees)
-					drive.turnRight(0.2);
-			}
-			if (imuAngleCurrent > desiredDegrees) {
-				drive.turnLeft(.2);
-			}
+				if (imuAngleDiffrence < desiredDegrees)
+					drive.turnRight(driveTurnSpeed);
 
+				else if (imuAngleDiffrence > desiredDegrees) {
+					drive.turnLeft(driveTurnSpeed);
+				}
+			}
 			// Have I turned enough?
 			// If yes. myState = MoveToTower
 
 			break;
 		case MoveToTower:
+			SmartDashboard.putString("Auto Case", "Move To Tower");
 
-			// Have I turned?
-			// How far have I gone?
-			// How far do I have to go?
-			// Have I got there.
-			// If yes. myState = Aim
+			if (encoder.getDistance() > 10) { // figure out this 10 number
+				drive.stop();
+				encoder.reset();
+				myState = AutonomousState.Aim;
 
+			} else {
+				if (imuAngleDiffrence > angleFudgeFactor) {
+					drive.turnLeft(driveTurnSpeed);
+				} else if (imuAngleDiffrence < angleFudgeFactor) {
+					drive.turnRight(driveTurnSpeed);
+				} else
+					drive.driveForward(driveForwardSpeed);
+			}
 			break;
+
+		// Have I turned?
+		// How far have I gone?
+		// How far do I have to go?
+		// Have I got there.
+		// If yes. myState = Aim
+
 		case Aim:
+			SmartDashboard.putString("Auto Case", "Aim. FT: " + foundTarget 
+					+ " CXV " + centerXValue);
+			
+			if(foundTarget == false){
+				drive.driveForward(driveForwardSpeed);
+			}
+			else if(centerXValue == 100){
+				drive.driveForward(driveForwardSpeed);
+			}
+			else if(centerXValue > 100.0){
+				drive.turnLeft(driveTurnSpeed);
+			} else
+				drive.turnRight(driveTurnSpeed);
+			
+			if(encoder.getDistance() > 20){ //distance from aim to shoot, ask  trevor
+				drive.stop();
+				myState = AutonomousState.Shoot;
+			}
+
 			// Aim correct?
 			// If yes. myState = shoot;
 			// If no.
 			// Need to trun left? if so turn
 			// Need to Turn right? if so turn
-			timerStart = Timer.getFPGATimestamp(); 
+			timerStart = Timer.getFPGATimestamp();
 			break;
 		case Shoot:
-			
-			
+			SmartDashboard.putString("Auto Case", "Shoot");
+
 			// Shoot;
-			
-			if(elapsedTime < .3){
-				arm.ballOutput(true);	
+
+			if (elapsedTime < .3) {
+				arm.ballOutput(true);
 			}
 			
 			myState = AutonomousState.Done;
 			break;
 		case Done:
+			SmartDashboard.putString("Auto Case", "Done");
 			// flash lights.
 			// Sound horn.
 		}
@@ -225,9 +317,26 @@ public class Robot extends IterativeRobot {
 	 */
 	public void teleopPeriodic() {
 
-		//drive.directInputDrive();
+		imuAngleCurrent = imu.getAngleZ();
+
+		SmartDashboard.putDouble("Imu Angle Current", imuAngleCurrent);
+		double imuAngleDiffrence = imuAngleCurrent - imuAngleOriginal;
+		SmartDashboard.putDouble("Imu Angle Diffrence", imuAngleDiffrence);
+		elapsedTime = Timer.getFPGATimestamp() - timerStart;
+		SmartDashboard.putDouble("Average Encoder Distance", encoder.getDistance());
+
+		/*
+		 * drive.frontLeft.set(.2); drive.rearLeft.set(.2);
+		 * drive.frontRight.set(.2); drive.rearRight.set(.2);
+		 * SmartDashboard.putNumber("Front Left CAN", drive.frontLeft.get());
+		 * SmartDashboard.putNumber("Rear Left CAN", drive.rearLeft.get());
+		 * SmartDashboard.putNumber("Front Right CAN", drive.frontRight.get());
+		 * SmartDashboard.putNumber("Rear Right CAN", drive.rearRight.get());
+		 */
+
 		drive.squaredInputDrive();
-		//drive.controlledInputDrive();
+
+		// go forward with button
 
 		// arm code
 		boolean leftBumper = controller.getRawButton(controllerMapping.leftBumper);
@@ -305,21 +414,20 @@ public class Robot extends IterativeRobot {
 
 		SmartDashboard.putNumber("Left Trigger Value", controller.getRawAxis(controllerMapping.leftTrigger));
 		SmartDashboard.putNumber("Right Trigger Value", controller.getRawAxis(controllerMapping.rightTrigger));
-		
+
 		SmartDashboard.putNumber("Left Encoder Rate", encoder.getLeftEncoder().getRate());
 		SmartDashboard.putNumber("Right Encoder Rate", encoder.getRightEncoder().getRate());
-		
+
 		SmartDashboard.putNumber("Left Encoder Distance", encoder.getLeftEncoder().getDistance());
 		SmartDashboard.putNumber("Right Encoder Distance", encoder.getRightEncoder().getDistance());
-		
+
 		if (allianceColor == DriverStation.Alliance.Blue) {
 			SmartDashboard.putString("Alliance Color", "Blue");
 		}
-		
+
 		if (allianceColor == DriverStation.Alliance.Red) {
 			SmartDashboard.putString("Alliance Color", "Red");
 		}
-
 
 		// smartDashboard.("leftEncoder", encoder.getLeftEncoder());
 		// smartDashboard.putNumber("rightEncoder",
@@ -332,7 +440,21 @@ public class Robot extends IterativeRobot {
 	 */
 	public void testPeriodic() {
 		LiveWindow.run();
+		encoder.reset();
+		imu.calibrate();
 
+		// drive.turnRight(-1*.2);
+
+		// drive.turnRight(.2);
+
+		/*
+		 * drive.frontLeft.set(.2); drive.rearLeft.set(.2);
+		 * drive.frontRight.set(-1 * .2); drive.rearRight.set(-1 * .2);
+		 * SmartDashboard.putNumber("Front Left CAN", drive.frontLeft.get());
+		 * SmartDashboard.putNumber("Rear Left CAN", drive.rearLeft.get());
+		 * SmartDashboard.putNumber("Front Right CAN", drive.frontRight.get());
+		 * SmartDashboard.putNumber("Rear Right CAN", drive.rearRight.get());
+		 */
 	}
 
 }
