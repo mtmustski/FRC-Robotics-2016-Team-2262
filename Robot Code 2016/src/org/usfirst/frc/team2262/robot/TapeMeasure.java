@@ -24,13 +24,18 @@ public class TapeMeasure {
 
 	public void pushUp(boolean pushUpButton) {
 
-		double frictionWheelPushSpeed = 0.4;
+		//double frictionWheelPushSpeed = 0.4;
 		double climberPushSpeed = 0;
+		
+	
 
 		if (pushUpButton) {
-			frictionWheel.set(frictionWheelPushSpeed);
+			for(double i = -0.5; i< -1.0; i -=0.02){
+			frictionWheel.set(i);
 			frontClimber.set(climberPushSpeed);
-			rearClimber.set(climberPushSpeed);
+			rearClimber.set(climberPushSpeed);	
+			}
+			
 		
 		}
 	}

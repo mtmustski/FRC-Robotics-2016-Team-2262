@@ -325,16 +325,8 @@ public class Robot extends IterativeRobot {
 		elapsedTime = Timer.getFPGATimestamp() - timerStart;
 		SmartDashboard.putNumber("Average Encoder Distance", encoder.getDistance());
 
-		/*
-		 * drive.frontLeft.set(.2); drive.rearLeft.set(.2);
-		 * drive.frontRight.set(.2); drive.rearRight.set(.2);
-		 * SmartDashboard.putNumber("Front Left CAN", drive.frontLeft.get());
-		 * SmartDashboard.putNumber("Rear Left CAN", drive.rearLeft.get());
-		 * SmartDashboard.putNumber("Front Right CAN", drive.frontRight.get());
-		 * SmartDashboard.putNumber("Rear Right CAN", drive.rearRight.get());
-		 */
-
-		drive.squaredInputDrive();
+		
+		drive.controlledArcadeDrive();
 
 		// go forward with button
 

@@ -21,8 +21,8 @@ public class Drive {
 	double kRotateValue = 0.6;
 	
 	//drive control variables
-	double rawLeftVoltage = 0;
-	double rawRightVoltage = 0;
+	//double rawLeftVoltage = 0;
+	//double rawRightVoltage = 0;
 	double processedLeftVoltage = 0;
 	double processedRightVoltage = 0;
 	double outputLeftVoltage = 0;
@@ -55,6 +55,7 @@ public class Drive {
 		drive = new RobotDrive(frontLeft, rearLeft, frontRight, rearRight);
 
 		joystick = new Joystick(joystickPort);
+		
 		
 		//encoder = new WheelRotation (6, 360);
 		
@@ -118,9 +119,14 @@ public class Drive {
 	
 	
 	public void controlledArcadeDrive() {
-
-		double moveValue = joystick.getY();
-		double rotateValue = kRotateValue * joystick.getX();
+		
+		drive.arcadeDrive(joystick.getY(), kRotateValue * joystick.getX(), true);
+		
+		/* rawLeftVoltage = 0;
+		double rawRightVoltage = 0;
+		
+		double moveValue = -joystick.getRawAxis(0); //Y Axis
+		double rotateValue = joystick.getRawAxis(1); //X Axis
 		
 		if (moveValue > 1) {
 			moveValue = 1;
@@ -145,7 +151,9 @@ public class Drive {
 	      } else {
 	        rotateValue = -(rotateValue * rotateValue);
 	      }
-
+	      
+	    rotateValue = kRotateValue * rotateValue;
+	      
 		if (moveValue > 0.0) {
 			if (rotateValue > 0.0) {
 				rawLeftVoltage = moveValue - rotateValue;
@@ -163,7 +171,25 @@ public class Drive {
 				rawRightVoltage = -Math.max(-moveValue, -rotateValue);
 			}
 		}
-
+		
+		if (rawLeftVoltage > 1) {
+			rawLeftVoltage = 1;
+		}
+		if (rawLeftVoltage < -1) {
+			rawLeftVoltage = -1;
+		}
+		if (rawRightVoltage > 1) {
+			rawRightVoltage = 1;
+		}
+		if (rawRightVoltage < -1) {
+			rawRightVoltage = -1;
+		}
+		
+		frontLeft.set(rawLeftVoltage);
+		rearLeft.set(rawLeftVoltage);
+		frontRight.set(rawRightVoltage);
+		rearLeft.set(rawRightVoltage);*/
+		
 	}
 
 	public double[] speedControl(double desiredLeftSpeed, double desiredRightSpeed, double currentLeftSpeed, double currentRightSpeed, double rawLeftVoltage, double rawRightVoltage) {
