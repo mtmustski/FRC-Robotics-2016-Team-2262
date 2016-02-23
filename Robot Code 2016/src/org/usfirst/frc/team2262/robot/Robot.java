@@ -180,9 +180,9 @@ public class Robot extends IterativeRobot {
 			} else {
 				if (imuAngleDiffrence > angleFudgeFactor) {
 
-					drive.turnLeft(driveTurnSpeed);
+					drive.smallTurnLeft(driveTurnSpeed);
 				} else if (imuAngleDiffrence < angleFudgeFactor) {
-					drive.turnRight(driveTurnSpeed);
+					drive.smallTurnRight(driveTurnSpeed);
 				} else
 					drive.driveForward(driveForwardSpeed);
 			}
@@ -205,9 +205,9 @@ public class Robot extends IterativeRobot {
 
 			} else {
 				if (imuAngleDiffrence > angleFudgeFactor) {
-					drive.turnLeft(driveTurnSpeed);
+					drive.smallTurnLeft(driveTurnSpeed);
 				} else if (imuAngleDiffrence < angleFudgeFactor) {
-					drive.turnRight(driveTurnSpeed);
+					drive.smallTurnRight(driveTurnSpeed);
 				} else
 					drive.driveForward(driveForwardSpeed);
 			}
@@ -240,9 +240,9 @@ public class Robot extends IterativeRobot {
 
 			} else {
 				if (imuAngleDiffrence > angleFudgeFactor) {
-					drive.turnLeft(driveTurnSpeed);
+					drive.smallTurnLeft(driveTurnSpeed);
 				} else if (imuAngleDiffrence < angleFudgeFactor) {
-					drive.turnRight(driveTurnSpeed);
+					drive.smallTurnRight(driveTurnSpeed);
 				} else
 					drive.driveForward(driveForwardSpeed);
 			}
@@ -265,9 +265,9 @@ public class Robot extends IterativeRobot {
 				drive.driveForward(driveForwardSpeed);
 			}
 			else if(centerXValue > 100.0){
-				drive.turnLeft(driveTurnSpeed);
+				drive.smallTurnLeft(driveTurnSpeed);
 			} else
-				drive.turnRight(driveTurnSpeed);
+				drive.smallTurnRight(driveTurnSpeed);
 			
 			if(encoder.getDistance() > 20){ //distance from aim to shoot, ask  trevor
 				drive.stop();

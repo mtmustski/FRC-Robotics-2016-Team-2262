@@ -91,6 +91,21 @@ public class Drive {
 		rearRight.set((double)-1*speed);
 	}
 	
+	public void smallTurnRight(double speed){
+		frontLeft.set((double)-1*speed);
+		rearLeft.set((double)-1*speed);
+		frontRight.set((double)-1 * speed * .8);
+		rearRight.set((double)-1*speed * .8); 
+		
+	}
+	
+	public void smallTurnLeft(double speed){
+		frontLeft.set((double)-1*speed * .8);
+		rearLeft.set((double)-1*speed * .8);
+		frontRight.set((double)-1*speed);
+		rearRight.set((double)-1*speed);
+	}
+	
 	public void directInputDrive() {
 		
 		drive.arcadeDrive(joystick, false);
