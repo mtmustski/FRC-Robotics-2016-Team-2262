@@ -14,7 +14,7 @@ import edu.wpi.first.wpilibj.networktables.NetworkTable;
 //import edu.wpi.first.wpilibj.Ultrasonic;
 //import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.smartdashboard.*;
-import edu.wpi.first.wpilibj.DriverStation.Alliance;;
+
 
 /**
  * The VM is configured to automatically run this class, and to call the
@@ -152,11 +152,11 @@ public class Robot extends IterativeRobot {
 		}
 
 		imuAngleCurrent = imu.getAngleZ();
-		SmartDashboard.putDouble("Imu Angle Current", imuAngleCurrent);
+		SmartDashboard.putNumber("Imu Angle Current", imuAngleCurrent);
 		double imuAngleDiffrence = imuAngleCurrent - imuAngleOriginal;
-		SmartDashboard.putDouble("Imu Angle Diffrence", imuAngleDiffrence);
+		SmartDashboard.putNumber("Imu Angle Diffrence", imuAngleDiffrence);
 		elapsedTime = Timer.getFPGATimestamp() - timerStart;
-		SmartDashboard.putDouble("Average Encoder Distance", encoder.getDistance());
+		SmartDashboard.putNumber("Average Encoder Distance", encoder.getDistance());
 
 		switch (myState) {
 		case LowerArm:
@@ -319,11 +319,11 @@ public class Robot extends IterativeRobot {
 
 		imuAngleCurrent = imu.getAngleZ();
 
-		SmartDashboard.putDouble("Imu Angle Current", imuAngleCurrent);
+		SmartDashboard.putNumber("Imu Angle Current", imuAngleCurrent);
 		double imuAngleDiffrence = imuAngleCurrent - imuAngleOriginal;
-		SmartDashboard.putDouble("Imu Angle Diffrence", imuAngleDiffrence);
+		SmartDashboard.putNumber("Imu Angle Diffrence", imuAngleDiffrence);
 		elapsedTime = Timer.getFPGATimestamp() - timerStart;
-		SmartDashboard.putDouble("Average Encoder Distance", encoder.getDistance());
+		SmartDashboard.putNumber("Average Encoder Distance", encoder.getDistance());
 
 		/*
 		 * drive.frontLeft.set(.2); drive.rearLeft.set(.2);
@@ -420,6 +420,9 @@ public class Robot extends IterativeRobot {
 
 		SmartDashboard.putNumber("Left Encoder Distance", encoder.getLeftEncoder().getDistance());
 		SmartDashboard.putNumber("Right Encoder Distance", encoder.getRightEncoder().getDistance());
+		
+		SmartDashboard.putNumber("Joystick X Axis", drive.joystick.getX());
+		SmartDashboard.putNumber("Joystick Y Axis", drive.joystick.getY());
 
 		if (allianceColor == DriverStation.Alliance.Blue) {
 			SmartDashboard.putString("Alliance Color", "Blue");
@@ -442,6 +445,9 @@ public class Robot extends IterativeRobot {
 		LiveWindow.run();
 		encoder.reset();
 		imu.calibrate();
+		
+		SmartDashboard.putNumber("Joystick X Axis", drive.joystick.getX());
+		SmartDashboard.putNumber("Joystick Y Axis", drive.joystick.getY());
 
 		// drive.turnRight(-1*.2);
 

@@ -15,7 +15,10 @@ public class Drive {
 
 	Joystick joystick;
 	
-	WheelRotation encoder;
+	//WheelRotation encoder;
+	
+	//controlled arcade drive variable
+	double kRotateValue = 0.6;
 	
 	//drive control variables
 	double rawLeftVoltage = 0;
@@ -53,7 +56,7 @@ public class Drive {
 
 		joystick = new Joystick(joystickPort);
 		
-		encoder = new WheelRotation (6, 360);
+		//encoder = new WheelRotation (6, 360);
 		
 	}
 	
@@ -99,25 +102,49 @@ public class Drive {
 
 	}
 	
-	public void controlledInputDrive(){
+	/*public void controlledInputDrive(){
 		
 		//for all arrays: 0 = left, 1 = right
 		processedVoltage = speedControl(rawVoltage[0] * maxLeftSpeed, rawVoltage[1] * maxRightSpeed, encoder.getLeftSpeed(), encoder.getRightSpeed(), rawVoltage[0], rawVoltage[1]);
 		outputVoltage = accelerationControl(outputVoltage[0], outputVoltage[1], processedVoltage[0], processedVoltage[1]);
-		rawVoltage = arcadeDrive();
+		rawVoltage = controlledArcadeDrive();
 		
 		frontLeft.set(outputVoltage[0]);
 		rearLeft.set(outputVoltage[0]);
 		frontRight.set(outputVoltage[1]);
 		rearRight.set(outputVoltage[1]);
 		
-	}
+	}*/
 	
 	
-	private double[] arcadeDrive() {
+	public void controlledArcadeDrive() {
 
 		double moveValue = joystick.getY();
-		double rotateValue = joystick.getX();
+		double rotateValue = kRotateValue * joystick.getX();
+		
+		if (moveValue > 1) {
+			moveValue = 1;
+		}
+		if (moveValue < -1) {
+			moveValue = -1;
+		}
+		if (rotateValue > 1) {
+			rotateValue = 1;
+		}
+		if (rotateValue < -1) {
+			rotateValue = -1;
+		}
+		
+		if (moveValue >= 0.0) {
+	        moveValue = (moveValue * moveValue);
+	      } else {
+	        moveValue = -(moveValue * moveValue);
+	      }
+	      if (rotateValue >= 0.0) {
+	        rotateValue = (rotateValue * rotateValue);
+	      } else {
+	        rotateValue = -(rotateValue * rotateValue);
+	      }
 
 		if (moveValue > 0.0) {
 			if (rotateValue > 0.0) {
@@ -136,11 +163,10 @@ public class Drive {
 				rawRightVoltage = -Math.max(-moveValue, -rotateValue);
 			}
 		}
-		return new double[] { rawLeftVoltage, rawRightVoltage };
 
 	}
 
-	private double[] speedControl(double desiredLeftSpeed, double desiredRightSpeed, double currentLeftSpeed, double currentRightSpeed, double rawLeftVoltage, double rawRightVoltage) {
+	public double[] speedControl(double desiredLeftSpeed, double desiredRightSpeed, double currentLeftSpeed, double currentRightSpeed, double rawLeftVoltage, double rawRightVoltage) {
 		
 		double kSpeed = 1.8;
 		
@@ -217,7 +243,7 @@ public class Drive {
 		
 	}
 	
-	private double[] accelerationControl (double previousLeftVoltage, double previousRightVoltage, double processedLeftVoltage, double processedRightVoltage) {
+	public double[] accelerationControl (double previousLeftVoltage, double previousRightVoltage, double processedLeftVoltage, double processedRightVoltage) {
 		
 		double kMaxAcceleration = 0.025;  //time delay constant between full back and full forward: .01=4seconds   .015=3seconds   .02=2seconds ??
 		
