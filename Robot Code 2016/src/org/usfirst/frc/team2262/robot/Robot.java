@@ -161,17 +161,17 @@ public class Robot extends IterativeRobot {
 		switch (myState) {
 		case LowerArm:
 			SmartDashboard.putString("Auto Case", "Lower Arm");
-			if (elapsedTime < .68) {
-				arm.elbowMotion(1, 0);
+			if (elapsedTime < .4) {
+				//arm.elbowMotion(1, 0);
 			} else {
-				arm.elbowMotion(-1, -1);
+				//arm.elbowMotion(-1, -1);
 				myState = AutonomousState.MoveOverLowBar;
 			}
 			break;
 		case MoveOverLowBar:
 
 			SmartDashboard.putString("Auto Case", "Move Over Low Bar");
-			if (encoder.getDistance() > 19.5) { // 19.5" is distance from start
+			if (encoder.getDistance() > 88) { // 19.5" is distance from start
 												// to over lowgaol? ask trevor
 				drive.stop();
 				encoder.reset();
@@ -180,9 +180,9 @@ public class Robot extends IterativeRobot {
 			} else {
 				if (imuAngleDiffrence > angleFudgeFactor) {
 
-					drive.smallTurnLeft(driveTurnSpeed);
+					drive.turnLeft(driveTurnSpeed);
 				} else if (imuAngleDiffrence < angleFudgeFactor) {
-					drive.smallTurnRight(driveTurnSpeed);
+					drive.turnRight(driveTurnSpeed);
 				} else
 					drive.driveForward(driveForwardSpeed);
 			}
@@ -196,7 +196,7 @@ public class Robot extends IterativeRobot {
 			break;
 		case MoveToX:
 			SmartDashboard.putString("Auto Case", "Move To X");
-			if (encoder.getDistance() > 20.75) { // 220.75 distance from after
+			if (encoder.getDistance() > 173) { // 220.75 distance from after
 													// lowgaol to turn area ask
 													// trevor
 				drive.stop();
@@ -205,9 +205,9 @@ public class Robot extends IterativeRobot {
 
 			} else {
 				if (imuAngleDiffrence > angleFudgeFactor) {
-					drive.smallTurnLeft(driveTurnSpeed);
+					drive.turnLeft(driveTurnSpeed);
 				} else if (imuAngleDiffrence < angleFudgeFactor) {
-					drive.smallTurnRight(driveTurnSpeed);
+					drive.turnRight(driveTurnSpeed);
 				} else
 					drive.driveForward(driveForwardSpeed);
 			}
@@ -233,16 +233,16 @@ public class Robot extends IterativeRobot {
 		case MoveToTower:
 			SmartDashboard.putString("Auto Case", "Move To Tower");
 
-			if (encoder.getDistance() > 10) { // figure out this 10 number
+			if (encoder.getDistance() > 35) { // figure out this 10 number
 				drive.stop();
 				encoder.reset();
 				myState = AutonomousState.Aim;
 
 			} else {
 				if (imuAngleDiffrence > angleFudgeFactor) {
-					drive.smallTurnLeft(driveTurnSpeed);
+					drive.turnLeft(driveTurnSpeed);
 				} else if (imuAngleDiffrence < angleFudgeFactor) {
-					drive.smallTurnRight(driveTurnSpeed);
+					drive.turnRight(driveTurnSpeed);
 				} else
 					drive.driveForward(driveForwardSpeed);
 			}
@@ -261,15 +261,15 @@ public class Robot extends IterativeRobot {
 			if(foundTarget == false){
 				drive.driveForward(driveForwardSpeed);
 			}
-			else if(centerXValue == 100){
+			else if(centerXValue == 81){
 				drive.driveForward(driveForwardSpeed);
 			}
-			else if(centerXValue > 100.0){
-				drive.smallTurnLeft(driveTurnSpeed);
+			else if(centerXValue > 81.0){
+				drive.turnLeft(driveTurnSpeed);
 			} else
-				drive.smallTurnRight(driveTurnSpeed);
+				drive.turnRight(driveTurnSpeed);
 			
-			if(encoder.getDistance() > 20){ //distance from aim to shoot, ask  trevor
+			if(encoder.getDistance() > 85){ //distance from aim to shoot, ask  trevor
 				drive.stop();
 				myState = AutonomousState.Shoot;
 			}
@@ -435,8 +435,10 @@ public class Robot extends IterativeRobot {
 	 */
 	public void testPeriodic() {
 		LiveWindow.run();
-		encoder.reset();
+		encoder.reset(); 
 		imu.calibrate();
+		
+		
 		
 		SmartDashboard.putNumber("Joystick X Axis", drive.joystick.getX());
 		SmartDashboard.putNumber("Joystick Y Axis", drive.joystick.getY());
