@@ -76,5 +76,12 @@ public class Arm {
 			roller.set(maxRollerSpeed);
 		}
 	}
+	
+	public void stopArmMotion () {
+		
+		elbow.set(0);
+		roller.set(0);
+		
+	}
 
 }

@@ -161,10 +161,10 @@ public class Robot extends IterativeRobot {
 		switch (myState) {
 		case LowerArm:
 			SmartDashboard.putString("Auto Case", "Lower Arm");
-			if (elapsedTime < .4) {
-				//arm.elbowMotion(1, 0);
+			if (elapsedTime < .3) {
+				arm.elbowMotion(1, 0);
 			} else {
-				//arm.elbowMotion(-1, -1);
+				arm.stopArmMotion();
 				myState = AutonomousState.MoveOverLowBar;
 			}
 			break;
@@ -178,7 +178,7 @@ public class Robot extends IterativeRobot {
 				myState = AutonomousState.MoveToX;
 
 			} else {
-				if (imuAngleDiffrence > angleFudgeFactor) {
+				if (imuAngleDiffrence > angleFudgeFactor) {  //angleFudgeFactor is set high (7 degrees)
 
 					drive.turnLeft(driveTurnSpeed);
 				} else if (imuAngleDiffrence < angleFudgeFactor) {
@@ -204,7 +204,7 @@ public class Robot extends IterativeRobot {
 				myState = AutonomousState.TurnToTower;
 
 			} else {
-				if (imuAngleDiffrence > angleFudgeFactor) {
+				if (imuAngleDiffrence > angleFudgeFactor) {  //angleFudgeFactor is set high (7 degrees)
 					drive.turnLeft(driveTurnSpeed);
 				} else if (imuAngleDiffrence < angleFudgeFactor) {
 					drive.turnRight(driveTurnSpeed);
@@ -215,8 +215,8 @@ public class Robot extends IterativeRobot {
 		case TurnToTower:
 			SmartDashboard.putString("Auto Case", "Turn To Tower");
 			if (Math.abs(imuAngleDiffrence - desiredDegrees) < 1) {
-
 				drive.stop();
+				encoder.reset();
 				myState = AutonomousState.MoveToTower;
 			} else {
 				if (imuAngleDiffrence < desiredDegrees)
@@ -239,7 +239,7 @@ public class Robot extends IterativeRobot {
 				myState = AutonomousState.Aim;
 
 			} else {
-				if (imuAngleDiffrence > angleFudgeFactor) {
+				if (imuAngleDiffrence > angleFudgeFactor) {  //angleFudgeFactor is set high (7 degrees)
 					drive.turnLeft(driveTurnSpeed);
 				} else if (imuAngleDiffrence < angleFudgeFactor) {
 					drive.turnRight(driveTurnSpeed);
@@ -264,7 +264,7 @@ public class Robot extends IterativeRobot {
 			else if(centerXValue == 81){
 				drive.driveForward(driveForwardSpeed);
 			}
-			else if(centerXValue > 81.0){
+			else if(centerXValue > 81.0){  //might oscillate too much
 				drive.turnLeft(driveTurnSpeed);
 			} else
 				drive.turnRight(driveTurnSpeed);
@@ -286,7 +286,7 @@ public class Robot extends IterativeRobot {
 
 			// Shoot;
 
-			if (elapsedTime < .3) {
+			if (elapsedTime < .3) {  //a lot of options here: 1) no ballOutput, just rollers 2) running into wall to have solid contact 3) backing up from the wall to not get stuck
 				arm.ballOutput(true);
 			}
 			

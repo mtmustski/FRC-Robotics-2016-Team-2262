@@ -67,10 +67,13 @@ public class Drive {
 		frontRight.set((double)-1*speed);
 		rearRight.set((double)-1*speed);*/
 		
-		frontLeft.set(speed);
+		/*frontLeft.set(speed);
 		rearLeft.set(speed);
 		frontRight.set((double)-1*speed);
-		rearRight.set((double)-1*speed);
+		rearRight.set((double)-1*speed);*/
+		
+		drive.arcadeDrive(-speed, 0, false);
+		
 		
 		
 	}
@@ -84,10 +87,12 @@ public class Drive {
 	
 	public void turnRight(double speed){
 		
-		frontLeft.set(speed);
+		/*frontLeft.set(speed);
 		rearLeft.set(speed);
 		frontRight.set(speed);
-		rearRight.set(speed);
+		rearRight.set(speed);*/
+		
+		drive.arcadeDrive(0, speed, false);
 	}
 	
 	public void turnLeft(double speed){
@@ -96,30 +101,36 @@ public class Drive {
 		frontRight.set((double)-1*speed);
 		rearRight.set((double)-1*speed);*/
 		
-		frontLeft.set((double)-1*speed);
+		/*frontLeft.set((double)-1*speed);
 		rearLeft.set((double)-1*speed);
 		frontRight.set((double)-1*speed);
-		rearRight.set((double)-1*speed);
+		rearRight.set((double)-1*speed);*/
+		
+		drive.arcadeDrive(0, -speed, false);
 	}
 	
-	public void smallTurnRight(double speed){
-		frontLeft.set((double)-1*speed *.4);
+	public void smallTurnRight(double forwardSpeed, double turnSpeed){
+		/*frontLeft.set((double)-1*speed *.4);
 		rearLeft.set((double)-1*speed *.4);
 		frontRight.set((double)-1*speed);
-		rearRight.set((double)-1*speed);
+		rearRight.set((double)-1*speed);*/
+		drive.arcadeDrive(-forwardSpeed, turnSpeed , false);
 		
 	}
 	
-	public void smallTurnLeft(double speed){
+	public void smallTurnLeft(double forwardSpeed, double turnSpeed){
 		/*frontLeft.set(speed * .8);
 		rearLeft.set(speed * .8);
 		frontRight.set((double)-1*speed);
 		rearRight.set((double)-1*speed);*/
 		
-		frontLeft.set(speed * .4);
+		/*frontLeft.set(speed * .4);
 		rearLeft.set(speed * .4);
 		frontRight.set(speed);
-		rearRight.set(speed);
+		rearRight.set(speed);*/
+
+		drive.arcadeDrive(-forwardSpeed, -turnSpeed , false);
+		
 	}
 	
 	public void directInputDrive() {

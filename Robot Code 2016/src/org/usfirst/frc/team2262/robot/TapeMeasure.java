@@ -35,20 +35,22 @@ public class TapeMeasure {
 			frontClimber.set(climberPushSpeed);
 			rearClimber.set(climberPushSpeed);	
 			}
+		} //else { can you try working on this?
 			
-		
-		}
+		//}
 	}
 
 	public void pullDown(boolean pullDownButton) {
 
 		double frictionWheelPullSpeed = 0;
-		double climberPullSpeed = -1;
+		//double climberPullSpeed = -1;
 
 		if (pullDownButton) {
 			frictionWheel.set(frictionWheelPullSpeed);
-			frontClimber.set(climberPullSpeed);
-			rearClimber.set(climberPullSpeed);
+			for(double i = -0.5; i< -1.0; i -=0.02){
+			frontClimber.set(i);
+			rearClimber.set(i);
+			}
 		}
 	}
 
