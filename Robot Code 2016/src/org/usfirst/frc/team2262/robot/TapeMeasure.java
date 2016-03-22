@@ -27,18 +27,48 @@ public class TapeMeasure {
 		//double frictionWheelPushSpeed = 0.4;
 		double climberPushSpeed = 0;
 		
-	
-
 		if (pushUpButton) {
-			for(double i = -0.5; i< -1.0; i -=0.02){
-			frictionWheel.set(i);
-			frontClimber.set(climberPushSpeed);
-			rearClimber.set(climberPushSpeed);	
+			
+			double currentSpeed = frictionWheel.get();
+			double desiredSpeed = -1;
+			double speedIncrement = -0.02;
+			double outputSpeed = 0;
+			
+			outputSpeed = currentSpeed + speedIncrement;
+			
+			if (outputSpeed < desiredSpeed) {
+				outputSpeed = desiredSpeed;
 			}
-		} //else { can you try working on this?
+			
+			//for(double i = -0.5; i< -1.0; i -=0.02){
+			//frictionWheel.set(i);
+			
+			frictionWheel.set(outputSpeed);
+			frontClimber.set(climberPushSpeed);
+			rearClimber.set(climberPushSpeed);
+			
+			} else {
+				
+				double currentSpeed = frictionWheel.get();
+				double desiredSpeed = 0;
+				double speedIncrement = 0.02;
+				double outputSpeed = 0;
+				
+				outputSpeed = currentSpeed + speedIncrement;
+				
+				if (outputSpeed > desiredSpeed) {
+					outputSpeed = desiredSpeed;
+				}
+				
+				frictionWheel.set(outputSpeed);
+				frontClimber.set(climberPushSpeed);
+				rearClimber.set(climberPushSpeed);
+			}
+	}
+			
 			
 		//}
-	}
+	
 
 	public void pullDown(boolean pullDownButton) {
 
@@ -46,11 +76,45 @@ public class TapeMeasure {
 		//double climberPullSpeed = -1;
 
 		if (pullDownButton) {
-			frictionWheel.set(frictionWheelPullSpeed);
-			for(double i = -0.5; i< -1.0; i -=0.02){
-			frontClimber.set(i);
-			rearClimber.set(i);
+			double currentSpeed = frontClimber.get();
+			double desiredSpeed = -1;
+			double speedIncrement = -0.02;
+			double outputSpeed = 0;
+			
+			outputSpeed = currentSpeed + speedIncrement;
+			
+			if (outputSpeed < desiredSpeed) {
+				outputSpeed = desiredSpeed;
 			}
+			
+			frictionWheel.set(frictionWheelPullSpeed);
+			frontClimber.set(outputSpeed);
+			rearClimber.set(outputSpeed);
+			
+			} else {
+				
+				double currentSpeed = frontClimber.get();
+				double desiredSpeed = 0;
+				double speedIncrement = 0.02;
+				double outputSpeed = 0;
+				
+				outputSpeed = currentSpeed + speedIncrement;
+				
+				if (outputSpeed > desiredSpeed) {
+					outputSpeed = desiredSpeed;
+				}
+				
+				frictionWheel.set(frictionWheelPullSpeed);
+				frontClimber.set(outputSpeed);
+				rearClimber.set(outputSpeed);
+			
+			
+			
+			//frictionWheel.set(frictionWheelPullSpeed);
+			//for(double i = -0.5; i< -1.0; i -=0.02){
+			//frontClimber.set(i);
+			//rearClimber.set(i);
+			
 		}
 	}
 
