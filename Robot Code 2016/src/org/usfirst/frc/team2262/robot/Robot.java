@@ -180,9 +180,9 @@ public class Robot extends IterativeRobot {
 			} else {
 				if (imuAngleDiffrence > angleFudgeFactor) {  //angleFudgeFactor is set high (7 degrees)
 
-					drive.turnLeft(driveTurnSpeed);
+					drive.smallTurnLeft(driveForwardSpeed, driveTurnSpeed);
 				} else if (imuAngleDiffrence < angleFudgeFactor) {
-					drive.turnRight(driveTurnSpeed);
+					drive.smallTurnRight(driveForwardSpeed, driveTurnSpeed);
 				} else
 					drive.driveForward(driveForwardSpeed);
 			}
@@ -205,9 +205,9 @@ public class Robot extends IterativeRobot {
 
 			} else {
 				if (imuAngleDiffrence > angleFudgeFactor) {  //angleFudgeFactor is set high (7 degrees)
-					drive.turnLeft(driveTurnSpeed);
+					drive.smallTurnLeft(driveForwardSpeed, driveTurnSpeed);
 				} else if (imuAngleDiffrence < angleFudgeFactor) {
-					drive.turnRight(driveTurnSpeed);
+					drive.smallTurnRight(driveForwardSpeed, driveTurnSpeed);
 				} else
 					drive.driveForward(driveForwardSpeed);
 			}
@@ -240,9 +240,9 @@ public class Robot extends IterativeRobot {
 
 			} else {
 				if (imuAngleDiffrence > angleFudgeFactor) {  //angleFudgeFactor is set high (7 degrees)
-					drive.turnLeft(driveTurnSpeed);
+					drive.smallTurnLeft(driveForwardSpeed, driveTurnSpeed);
 				} else if (imuAngleDiffrence < angleFudgeFactor) {
-					drive.turnRight(driveTurnSpeed);
+					drive.smallTurnRight(driveForwardSpeed, driveTurnSpeed);
 				} else
 					drive.driveForward(driveForwardSpeed);
 			}
@@ -265,10 +265,20 @@ public class Robot extends IterativeRobot {
 				drive.driveForward(driveForwardSpeed);
 			}
 			else if(centerXValue > 81.0){  //might oscillate too much
-				drive.turnLeft(driveTurnSpeed);
-			} else
-				drive.turnRight(driveTurnSpeed);
-			
+				if (centerXValue < 90)
+					drive.turnLeft(driveTurnSpeed / 3);
+				else if (centerXValue < 110)
+					drive.turnLeft(driveTurnSpeed / 2);
+				else
+					drive.turnLeft(driveTurnSpeed);
+			} else {
+				if (centerXValue > 70)
+					drive.turnRight(driveTurnSpeed / 3);
+				else if (centerXValue > 50)
+					drive.turnRight(driveTurnSpeed / 2);
+				else
+					drive.turnRight(driveTurnSpeed);
+			}
 			if(encoder.getDistance() > 85){ //distance from aim to shoot, ask  trevor
 				drive.stop();
 				myState = AutonomousState.Shoot;
