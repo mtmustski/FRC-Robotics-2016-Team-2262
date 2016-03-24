@@ -64,6 +64,7 @@ public class Robot extends IterativeRobot {
 	double elapsedTime = 0;
 	double angleFudgeFactor = 0;
 	double driveForwardSpeed = 0;
+	double driveCorrectionSpeed = 0;
 	double driveTurnSpeed = 0;
 
 	enum AutonomousState {
@@ -128,6 +129,7 @@ public class Robot extends IterativeRobot {
 		angleFudgeFactor = 7;
 
 		driveForwardSpeed = .5;
+		driveCorrectionSpeed = 0.1;
 		driveTurnSpeed = .2;
 	}
 
@@ -336,7 +338,7 @@ public class Robot extends IterativeRobot {
 		SmartDashboard.putNumber("Average Encoder Distance", encoder.getDistance());
 
 		
-		drive.controlledArcadeDrive();
+		drive.controlledArcadeDrive(0.75 * controller.getRawAxis(controllerMapping.leftY), controller.getRawAxis(controllerMapping.leftX));
 
 		// go forward with button
 

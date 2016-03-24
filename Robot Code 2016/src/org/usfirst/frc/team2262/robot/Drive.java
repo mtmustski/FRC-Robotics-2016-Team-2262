@@ -161,9 +161,9 @@ public class Drive {
 	}*/
 	
 	
-	public void controlledArcadeDrive() {
+	public void controlledArcadeDrive(double yAxis, double xAxis) {
 		
-		drive.arcadeDrive(joystick.getY(), kRotateValue * joystick.getX(), true);
+		drive.arcadeDrive(yAxis , kRotateValue * xAxis, true);
 		
 		/* rawLeftVoltage = 0;
 		double rawRightVoltage = 0;
