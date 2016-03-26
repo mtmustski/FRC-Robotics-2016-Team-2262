@@ -1,5 +1,6 @@
 package org.usfirst.frc.team2262.robot;
 
+import edu.wpi.first.wpilibj.CameraServer;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.IterativeRobot;
 
@@ -40,6 +41,8 @@ public class Robot extends IterativeRobot {
 
 	Drive drive;
 
+	CameraServer server;
+	
 	ADIS16448_IMU imu;
 
 	int autoLoopCounter;
@@ -101,6 +104,9 @@ public class Robot extends IterativeRobot {
 
 		// declaring encoder distancePerPulse
 		// double distancePerPulse;
+		server = CameraServer.getInstance();
+		server.setQuality(50);
+		server.startAutomaticCapture("cam0");
 	}
 
 	/**
@@ -143,8 +149,62 @@ public class Robot extends IterativeRobot {
 		 * forwards half speed autoLoopCounter++; } else { myRobot.drive(0.0,
 		 * 0.0); // stop robot }
 		 */
+		elapsedTime = Timer.getFPGATimestamp() - timerStart;
+	
+		
+		//low bar mode
+		if (elapsedTime < 1) {
+			arm.elbowMotion(1, false);
+		} else {
+			arm.stopArmMotion();
+		}
 
-		double[] defaultValue = new double[0];
+		if(elapsedTime > 1 && elapsedTime < 6){
+			drive.driveForward(0.35);
+		} else {
+			drive.stop();
+		}
+		
+		//reach mode
+		/*if(elapsedTime > 1 && elapsedTime < 4){
+			drive.driveForward(0.3);
+		} else {
+			drive.stop();
+		}*/
+		
+		//see-saw mode
+		/*if(elapsedTime > 1 && elapsedTime < 3.5){
+			drive.driveForward(0.3);
+		} else {
+			drive.stop();
+		}
+		
+		if (elapsedTime > 3.5 && elapsedTime < 4.5) {
+			arm.elbowMotion(1, false);
+		} else {
+			arm.stopArmMotion();
+		}
+		
+		if(elapsedTime > 4.5 && elapsedTime < 7){
+			drive.driveForward(0.4);
+		} else {
+			drive.stop();
+		}*/
+		
+		//gate mode
+		/*if (elapsedTime < 1) {
+			arm.elbowMotion(1, false);
+		} else {
+			arm.stopArmMotion();
+		}
+
+		if(elapsedTime > 1 && elapsedTime < 4.5){
+			drive.driveForward(0.7);
+		} else {
+			drive.stop();
+		}*/
+		
+	/*	double[] defaultValue = new double[0];
 		centerXValue = 100.0;
 		boolean  foundTarget  = false;
 		double[] centerX = table.getNumberArray("centerX", defaultValue);
@@ -309,7 +369,7 @@ public class Robot extends IterativeRobot {
 			// flash lights.
 			// Sound horn.
 		}
-
+*/
 	}
 
 	/**
@@ -338,7 +398,7 @@ public class Robot extends IterativeRobot {
 		SmartDashboard.putNumber("Average Encoder Distance", encoder.getDistance());
 
 		
-		drive.controlledArcadeDrive(0.75 * controller.getRawAxis(controllerMapping.leftY), controller.getRawAxis(controllerMapping.leftX));
+		drive.controlledArcadeDrive(controller.getRawAxis(controllerMapping.leftY), controller.getRawAxis(controllerMapping.rightX));
 
 		// go forward with button
 
@@ -350,16 +410,16 @@ public class Robot extends IterativeRobot {
 		boolean buttonX = controller.getRawButton(controllerMapping.buttonX);
 		boolean buttonB = controller.getRawButton(controllerMapping.buttonB);
 
-		if (leftBumper == true) {
-			arm.ballIntake(leftBumper);
+		if (rightTrigger > 0) {
+			arm.ballIntake(rightTrigger);
 		}
 
 		if (rightBumper == true) {
 			arm.ballOutput(rightBumper);
 		}
 
-		if (leftTrigger != 0.0 || rightTrigger != 0.0) {
-			arm.elbowMotion(leftTrigger, rightTrigger);
+		if (leftTrigger != 0.0 || leftBumper == true) {
+			arm.elbowMotion(leftTrigger, leftBumper);
 		}
 
 		if (buttonX == true || buttonB == true) {

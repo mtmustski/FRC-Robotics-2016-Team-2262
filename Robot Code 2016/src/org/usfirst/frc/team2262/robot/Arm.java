@@ -20,12 +20,12 @@ public class Arm {
 		//limitSwitchBottom = new DigitalInput(bottomChannel);
 	}
 
-	public void ballIntake(boolean intakeButton) {
+	public void ballIntake(double intakeTrigger) {
 
 		double elbowIntakeSpeed = -0.15;
-		double rollerIntakeSpeed = -0.4;
+		double rollerIntakeSpeed = -0.6;
 
-		if (intakeButton) {
+		if (intakeTrigger > 0) {
 			elbow.set(elbowIntakeSpeed);
 			roller.set(rollerIntakeSpeed);
 		}
@@ -45,21 +45,21 @@ public class Arm {
 		}
 	}
 
-	public void elbowMotion(double triggerDown, double triggerUp) {
+	public void elbowMotion(double triggerDown, boolean buttonUp) {
 
-		double maxElbowSpeed = 0.3;
+		double maxElbowSpeed = 0.25;
 
 		// elbow down
 		if (triggerDown > 0) {
-				elbow.set(-triggerDown * maxElbowSpeed);
+				elbow.set(-maxElbowSpeed);
 		}
 
 		// elbow up
-		if (triggerUp > 0) {
+		if (buttonUp) {
 			if (!limitSwitchTop.get()) {
 				elbow.set(0);
 			} else {
-				elbow.set(triggerUp * maxElbowSpeed);
+				elbow.set(maxElbowSpeed);
 			}
 		}
 	}
