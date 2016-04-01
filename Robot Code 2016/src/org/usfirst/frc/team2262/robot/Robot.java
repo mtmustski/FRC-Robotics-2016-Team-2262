@@ -151,7 +151,7 @@ public class Robot extends IterativeRobot {
 		 */
 		elapsedTime = Timer.getFPGATimestamp() - timerStart;
 	
-		
+		/*
 		//low bar mode
 		if (elapsedTime < 1) {
 			arm.elbowMotion(1, false);
@@ -163,7 +163,7 @@ public class Robot extends IterativeRobot {
 			drive.driveForward(0.35);
 		} else {
 			drive.stop();
-		}
+		}*/
 		
 		//reach mode
 		/*if(elapsedTime > 1 && elapsedTime < 4){
@@ -204,7 +204,7 @@ public class Robot extends IterativeRobot {
 			drive.stop();
 		}*/
 		
-	/*	double[] defaultValue = new double[0];
+		double[] defaultValue = new double[0];
 		centerXValue = 100.0;
 		boolean  foundTarget  = false;
 		double[] centerX = table.getNumberArray("centerX", defaultValue);
@@ -223,8 +223,8 @@ public class Robot extends IterativeRobot {
 		switch (myState) {
 		case LowerArm:
 			SmartDashboard.putString("Auto Case", "Lower Arm");
-			if (elapsedTime < .3) {
-				arm.elbowMotion(1, 0);
+			if (elapsedTime < 1) {
+				arm.elbowMotion(1, false);
 			} else {
 				arm.stopArmMotion();
 				myState = AutonomousState.MoveOverLowBar;
@@ -233,20 +233,21 @@ public class Robot extends IterativeRobot {
 		case MoveOverLowBar:
 
 			SmartDashboard.putString("Auto Case", "Move Over Low Bar");
-			if (encoder.getDistance() > 88) { // 19.5" is distance from start
+			if (elapsedTime > 6) { //(encoder.getDistance() > 88) { // 19.5" is distance from start
 												// to over lowgaol? ask trevor
 				drive.stop();
 				encoder.reset();
 				myState = AutonomousState.MoveToX;
 
 			} else {
-				if (imuAngleDiffrence > angleFudgeFactor) {  //angleFudgeFactor is set high (7 degrees)
+				/*if (imuAngleDiffrence > angleFudgeFactor) {  //angleFudgeFactor is set high (7 degrees)
 
 					drive.smallTurnLeft(driveForwardSpeed, driveTurnSpeed);
 				} else if (imuAngleDiffrence < angleFudgeFactor) {
 					drive.smallTurnRight(driveForwardSpeed, driveTurnSpeed);
 				} else
-					drive.driveForward(driveForwardSpeed);
+					drive.driveForward(driveForwardSpeed);*/
+				drive.driveForward(0.4);
 			}
 
 			// Have I turned?
@@ -258,7 +259,7 @@ public class Robot extends IterativeRobot {
 			break;
 		case MoveToX:
 			SmartDashboard.putString("Auto Case", "Move To X");
-			if (encoder.getDistance() > 173) { // 220.75 distance from after
+			if (elapsedTime > 6.5){ //(encoder.getDistance() > 173) { // 220.75 distance from after
 													// lowgaol to turn area ask
 													// trevor
 				drive.stop();
@@ -266,12 +267,13 @@ public class Robot extends IterativeRobot {
 				myState = AutonomousState.TurnToTower;
 
 			} else {
-				if (imuAngleDiffrence > angleFudgeFactor) {  //angleFudgeFactor is set high (7 degrees)
+				/*if (imuAngleDiffrence > angleFudgeFactor) {  //angleFudgeFactor is set high (7 degrees)
 					drive.smallTurnLeft(driveForwardSpeed, driveTurnSpeed);
 				} else if (imuAngleDiffrence < angleFudgeFactor) {
 					drive.smallTurnRight(driveForwardSpeed, driveTurnSpeed);
 				} else
-					drive.driveForward(driveForwardSpeed);
+					drive.driveForward(driveForwardSpeed);*/
+				drive.stop();
 			}
 			break;
 		case TurnToTower:
@@ -369,7 +371,7 @@ public class Robot extends IterativeRobot {
 			// flash lights.
 			// Sound horn.
 		}
-*/
+
 	}
 
 	/**
