@@ -134,6 +134,25 @@ public class Drive {
 		
 	}
 	
+	public void brakeMode(boolean breakButton) {
+		
+		if (breakButton) {
+			
+		frontLeft.enableBrakeMode(true);
+		frontRight.enableBrakeMode(true);
+		rearLeft.enableBrakeMode(true);
+		rearRight.enableBrakeMode(true);
+		
+		} else {
+		
+			frontLeft.enableBrakeMode(false);
+			frontRight.enableBrakeMode(false);
+			rearLeft.enableBrakeMode(false);
+			rearRight.enableBrakeMode(false);
+			
+		}
+	}
+	
 	public void directInputDrive() {
 		
 		drive.arcadeDrive(joystick, false);

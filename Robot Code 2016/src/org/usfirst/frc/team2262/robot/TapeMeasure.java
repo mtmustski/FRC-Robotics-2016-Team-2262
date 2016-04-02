@@ -24,8 +24,17 @@ public class TapeMeasure {
 
 	public void pushUp(boolean pushUpButton) {
 
-		//double frictionWheelPushSpeed = 0.4;
+		double frictionWheelPushSpeed = 0.4; //0.4
 		double climberPushSpeed = 0;
+		
+		frictionWheel.set(frictionWheelPushSpeed);
+		frontClimber.set(climberPushSpeed);
+		rearClimber.set(climberPushSpeed);
+		
+		//for(double i = -0.5; i< -1.0; i -=0.02){
+			//frictionWheel.set(i); }
+		
+		/*double climberPushSpeed = 0;
 		
 		if (pushUpButton) {
 			
@@ -40,8 +49,7 @@ public class TapeMeasure {
 				outputSpeed = desiredSpeed;
 			}
 			
-			//for(double i = -0.5; i< -1.0; i -=0.02){
-			//frictionWheel.set(i);
+			
 			
 			frictionWheel.set(outputSpeed);
 			frontClimber.set(climberPushSpeed);
@@ -63,7 +71,7 @@ public class TapeMeasure {
 				frictionWheel.set(outputSpeed);
 				frontClimber.set(climberPushSpeed);
 				rearClimber.set(climberPushSpeed);
-			}
+			}*/
 	}
 			
 			
@@ -73,9 +81,9 @@ public class TapeMeasure {
 	public void pullDown(boolean pullDownButton) {
 
 		double frictionWheelPullSpeed = 0;
-		//double climberPullSpeed = -1;
+		double climberPullSpeed = -0.5; //-0.5
 
-		if (pullDownButton) {
+		/*if (pullDownButton) {
 			double currentSpeed = frontClimber.get();
 			double desiredSpeed = -1;
 			double speedIncrement = -0.02;
@@ -106,7 +114,7 @@ public class TapeMeasure {
 				
 				frictionWheel.set(frictionWheelPullSpeed);
 				frontClimber.set(outputSpeed);
-				rearClimber.set(outputSpeed);
+				rearClimber.set(outputSpeed);*/
 			
 			
 			
@@ -114,8 +122,12 @@ public class TapeMeasure {
 			//for(double i = -0.5; i< -1.0; i -=0.02){
 			//frontClimber.set(i);
 			//rearClimber.set(i);
-			
-		}
+		
+		frictionWheel.set(frictionWheelPullSpeed);
+		frontClimber.set(climberPullSpeed);
+		rearClimber.set(climberPullSpeed);
+		
+		//}
 	}
 
 }

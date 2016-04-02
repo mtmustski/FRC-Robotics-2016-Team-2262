@@ -380,6 +380,9 @@ public class Robot extends IterativeRobot {
 	 */
 	public void teleopInit() {
 
+		tapeMeasure.frictionWheel.set(0);
+		tapeMeasure.frontClimber.set(0);
+		tapeMeasure.rearClimber.set(0);
 		/*
 		 * leftDrive.stop(); rightDrive.stop();
 		 */
@@ -401,6 +404,8 @@ public class Robot extends IterativeRobot {
 
 		
 		drive.controlledArcadeDrive(controller.getRawAxis(controllerMapping.leftY), controller.getRawAxis(controllerMapping.rightX));
+		
+		drive.brakeMode(controller.getRawButton(controllerMapping.buttonStart));
 
 		// go forward with button
 
@@ -451,7 +456,10 @@ public class Robot extends IterativeRobot {
 			tapeMeasure.pullDown(buttonA);
 		}
 
-		if (!(buttonY || buttonX)) {
+		//tapeMeasure.pushUp(controller.getRawButton(controllerMapping.buttonY));
+		//tapeMeasure.pullDown(controller.getRawButton(controllerMapping.buttonA));
+		
+		if (!(buttonY || buttonA)) {
 			tapeMeasure.frictionWheel.set(0);
 			tapeMeasure.frontClimber.set(0);
 			tapeMeasure.rearClimber.set(0);
@@ -459,8 +467,6 @@ public class Robot extends IterativeRobot {
 
 		imu.getAngle();
 
-		tapeMeasure.pushUp(controller.getRawButton(controllerMapping.buttonY));
-		tapeMeasure.pullDown(controller.getRawButton(controllerMapping.buttonA));
 
 		SmartDashboard.putNumber("IMU X Angle", imu.getAngleX());
 		SmartDashboard.putNumber("IMU Y Angle", imu.getAngleY());
