@@ -41,7 +41,7 @@ public class Robot extends IterativeRobot {
 
 	Drive drive;
 
-	CameraServer server;
+	//CameraServer server;
 	
 	ADIS16448_IMU imu;
 
@@ -104,9 +104,9 @@ public class Robot extends IterativeRobot {
 
 		// declaring encoder distancePerPulse
 		// double distancePerPulse;
-		server = CameraServer.getInstance();
+		/*server = CameraServer.getInstance();
 		server.setQuality(50);
-		server.startAutomaticCapture("cam0");
+		server.startAutomaticCapture("cam0");*/
 	}
 
 	/**
@@ -130,7 +130,7 @@ public class Robot extends IterativeRobot {
 		SmartDashboard.putNumber("Imu Angle Original", imuAngleOriginal);
 
 		// angle we need to turn to for tower
-		desiredDegrees = 60;
+		desiredDegrees = 55;
 
 		angleFudgeFactor = 7;
 
@@ -151,7 +151,7 @@ public class Robot extends IterativeRobot {
 		 */
 		elapsedTime = Timer.getFPGATimestamp() - timerStart;
 	
-		/*
+		
 		//low bar mode
 		if (elapsedTime < 1) {
 			arm.elbowMotion(1, false);
@@ -159,11 +159,25 @@ public class Robot extends IterativeRobot {
 			arm.stopArmMotion();
 		}
 
-		if(elapsedTime > 1 && elapsedTime < 6){
+		if(elapsedTime > 1 && elapsedTime < 7.25){
 			drive.driveForward(0.35);
-		} else {
+		}
+		
+		if (elapsedTime > 7.25 && elapsedTime < 7.7)
+			drive.turnRight(0.2);
+		
+		if (elapsedTime > 7.7 && elapsedTime < 10.4)
+			drive.driveForward(0.4);
+	
+		if (elapsedTime > 10.4 && elapsedTime < 12.6){
+			arm.ballOutput(true);
 			drive.stop();
-		}*/
+		}
+		
+		if (elapsedTime > 12.6){	
+			drive.stop();
+			arm.stopArmMotion();	
+		}
 		
 		//reach mode
 		/*if(elapsedTime > 1 && elapsedTime < 4){
@@ -198,13 +212,18 @@ public class Robot extends IterativeRobot {
 			arm.stopArmMotion();
 		}
 
-		if(elapsedTime > 1 && elapsedTime < 4.5){
-			drive.driveForward(0.7);
-		} else {
+		if(elapsedTime > 1 && elapsedTime < 5){
+			drive.driveForward(0.8);
+		}
+		
+		if(elapsedTime > 5 && elapsedTime < 6.5){
+			drive.driveForward(0.5);
+		}
+		else {
 			drive.stop();
 		}*/
 		
-		double[] defaultValue = new double[0];
+		/*double[] defaultValue = new double[0];
 		centerXValue = 100.0;
 		boolean  foundTarget  = false;
 		double[] centerX = table.getNumberArray("centerX", defaultValue);
@@ -233,7 +252,7 @@ public class Robot extends IterativeRobot {
 		case MoveOverLowBar:
 
 			SmartDashboard.putString("Auto Case", "Move Over Low Bar");
-			if (elapsedTime > 6) { //(encoder.getDistance() > 88) { // 19.5" is distance from start
+			if (elapsedTime > 5.9) { //(encoder.getDistance() > 88) { // 19.5" is distance from start //5.6
 												// to over lowgaol? ask trevor
 				drive.stop();
 				encoder.reset();
@@ -246,7 +265,7 @@ public class Robot extends IterativeRobot {
 				} else if (imuAngleDiffrence < angleFudgeFactor) {
 					drive.smallTurnRight(driveForwardSpeed, driveTurnSpeed);
 				} else
-					drive.driveForward(driveForwardSpeed);*/
+					drive.driveForward(driveForwardSpeed);
 				drive.driveForward(0.4);
 			}
 
@@ -259,7 +278,7 @@ public class Robot extends IterativeRobot {
 			break;
 		case MoveToX:
 			SmartDashboard.putString("Auto Case", "Move To X");
-			if (elapsedTime > 6.5){ //(encoder.getDistance() > 173) { // 220.75 distance from after
+			if (elapsedTime > 6){ //(encoder.getDistance() > 173) { // 220.75 distance from after
 													// lowgaol to turn area ask
 													// trevor
 				drive.stop();
@@ -272,29 +291,26 @@ public class Robot extends IterativeRobot {
 				} else if (imuAngleDiffrence < angleFudgeFactor) {
 					drive.smallTurnRight(driveForwardSpeed, driveTurnSpeed);
 				} else
-					drive.driveForward(driveForwardSpeed);*/
+					drive.driveForward(driveForwardSpeed);
 				drive.stop();
 			}
 			break;
 		case TurnToTower:
 			SmartDashboard.putString("Auto Case", "Turn To Tower");
-			if (Math.abs(imuAngleDiffrence - desiredDegrees) < 1) {
+			if (elapsedTime > 8) {
 				drive.stop();
 				encoder.reset();
-				myState = AutonomousState.MoveToTower;
+				myState = AutonomousState.Aim;
 			} else {
-				if (imuAngleDiffrence < desiredDegrees)
-					drive.turnRight(driveTurnSpeed);
-
-				else if (imuAngleDiffrence > desiredDegrees) {
-					drive.turnLeft(driveTurnSpeed);
+				if (elapsedTime > 6.2 && elapsedTime < 7) {
+					drive.turnRight(0.3);
 				}
 			}
 			// Have I turned enough?
 			// If yes. myState = MoveToTower
 
 			break;
-		case MoveToTower:
+		/*case MoveToTower: //not enabled
 			SmartDashboard.putString("Auto Case", "Move To Tower");
 
 			if (encoder.getDistance() > 35) { // figure out this 10 number
@@ -321,12 +337,19 @@ public class Robot extends IterativeRobot {
 		case Aim:
 			SmartDashboard.putString("Auto Case", "Aim. FT: " + foundTarget 
 					+ " CXV " + centerXValue);
+			if (elapsedTime > 10) {
+				drive.stop();
+				myState = AutonomousState.Shoot;
+				
+			} else {
 			
 			if(foundTarget == false){
-				drive.driveForward(driveForwardSpeed);
+				drive.stop();
+				myState = AutonomousState.Shoot;
 			}
 			else if(centerXValue == 81){
-				drive.driveForward(driveForwardSpeed);
+				drive.stop();
+				myState = AutonomousState.Shoot;
 			}
 			else if(centerXValue > 81.0){  //might oscillate too much
 				if (centerXValue < 90)
@@ -343,34 +366,53 @@ public class Robot extends IterativeRobot {
 				else
 					drive.turnRight(driveTurnSpeed);
 			}
-			if(encoder.getDistance() > 85){ //distance from aim to shoot, ask  trevor
-				drive.stop();
-				myState = AutonomousState.Shoot;
-			}
+			//if(encoder.getDistance() > 85){ //distance from aim to shoot, ask  trevor
+				//drive.stop();
+				//myState = AutonomousState.Shoot;
+			//}
 
 			// Aim correct?
 			// If yes. myState = shoot;
 			// If no.
 			// Need to trun left? if so turn
 			// Need to Turn right? if so turn
-			timerStart = Timer.getFPGATimestamp();
+			}
+			
+			
 			break;
+			
 		case Shoot:
 			SmartDashboard.putString("Auto Case", "Shoot");
 
+			//Move to Tower
+			if (elapsedTime > 10.5 && elapsedTime < 14) {
+				drive.driveForward(0.25);
+			}
 			// Shoot;
 
-			if (elapsedTime < .3) {  //a lot of options here: 1) no ballOutput, just rollers 2) running into wall to have solid contact 3) backing up from the wall to not get stuck
+			if (elapsedTime > 14 && elapsedTime < 15) {  //a lot of options here: 1) no ballOutput, just rollers 2) running into wall to have solid contact 3) backing up from the wall to not get stuck
 				arm.ballOutput(true);
+				
+				drive.frontLeft.enableBrakeMode(true);
+				drive.frontRight.enableBrakeMode(true);
+				drive.rearLeft.enableBrakeMode(true);
+				drive.rearRight.enableBrakeMode(true);
+				
+				drive.stop();
 			}
 			
 			myState = AutonomousState.Done;
 			break;
 		case Done:
 			SmartDashboard.putString("Auto Case", "Done");
+			
+			drive.frontLeft.enableBrakeMode(false);
+			drive.frontRight.enableBrakeMode(false);
+			drive.rearLeft.enableBrakeMode(false);
+			drive.rearRight.enableBrakeMode(false);
 			// flash lights.
 			// Sound horn.
-		}
+		}*/
 
 	}
 
@@ -383,6 +425,11 @@ public class Robot extends IterativeRobot {
 		tapeMeasure.frictionWheel.set(0);
 		tapeMeasure.frontClimber.set(0);
 		tapeMeasure.rearClimber.set(0);
+		
+		drive.frontLeft.enableBrakeMode(false);
+		drive.frontRight.enableBrakeMode(false);
+		drive.rearLeft.enableBrakeMode(false);
+		drive.rearRight.enableBrakeMode(false);
 		/*
 		 * leftDrive.stop(); rightDrive.stop();
 		 */
@@ -416,6 +463,7 @@ public class Robot extends IterativeRobot {
 		double rightTrigger = controller.getRawAxis(controllerMapping.rightTrigger);
 		boolean buttonX = controller.getRawButton(controllerMapping.buttonX);
 		boolean buttonB = controller.getRawButton(controllerMapping.buttonB);
+		boolean buttonA = controller.getRawButton(controllerMapping.buttonA);
 
 		if (rightTrigger > 0) {
 			arm.ballIntake(rightTrigger);
@@ -432,8 +480,12 @@ public class Robot extends IterativeRobot {
 		if (buttonX == true || buttonB == true) {
 			arm.rollerMotion(buttonX, buttonB);
 		}
+		
+		if (buttonA == true) {
+			arm.powerArm(buttonA);
+		}
 
-		if (!(leftBumper || rightBumper || leftTrigger != 0 || rightTrigger != 0 || buttonX || buttonB)) {
+		if (!(leftBumper || rightBumper || leftTrigger != 0 || rightTrigger != 0 || buttonX || buttonB || buttonA)) {
 			arm.elbow.set(0);
 			arm.roller.set(0);
 		}
@@ -445,7 +497,7 @@ public class Robot extends IterativeRobot {
 		// controller.getRawButton(controllerMapping.buttonB));
 
 		// tape measure code
-		boolean buttonY = controller.getRawButton(controllerMapping.buttonY);
+		/*boolean buttonY = controller.getRawButton(controllerMapping.buttonY);
 		boolean buttonA = controller.getRawButton(controllerMapping.buttonA);
 
 		if (buttonY) {
@@ -463,7 +515,7 @@ public class Robot extends IterativeRobot {
 			tapeMeasure.frictionWheel.set(0);
 			tapeMeasure.frontClimber.set(0);
 			tapeMeasure.rearClimber.set(0);
-		}
+		}*/
 
 		imu.getAngle();
 

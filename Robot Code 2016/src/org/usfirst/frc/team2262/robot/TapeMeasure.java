@@ -81,7 +81,7 @@ public class TapeMeasure {
 	public void pullDown(boolean pullDownButton) {
 
 		double frictionWheelPullSpeed = 0;
-		double climberPullSpeed = -0.5; //-0.5
+		double climberPullSpeed = -1; //-0.5
 
 		/*if (pullDownButton) {
 			double currentSpeed = frontClimber.get();

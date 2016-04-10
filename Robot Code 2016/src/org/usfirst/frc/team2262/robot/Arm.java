@@ -22,8 +22,8 @@ public class Arm {
 
 	public void ballIntake(double intakeTrigger) {
 
-		double elbowIntakeSpeed = -0.15;
-		double rollerIntakeSpeed = -0.6;
+		double elbowIntakeSpeed = -0.135;
+		double rollerIntakeSpeed = -0.75;
 
 		if (intakeTrigger > 0) {
 			elbow.set(elbowIntakeSpeed);
@@ -75,6 +75,16 @@ public class Arm {
 		if (rollerOutButton) {
 			roller.set(maxRollerSpeed);
 		}
+	}
+	
+	public void powerArm (boolean powerArmButton) {
+
+		double maxElbowSpeed = -1;
+
+		if (powerArmButton) {
+			elbow.set(-maxElbowSpeed);
+		}
+
 	}
 	
 	public void stopArmMotion () {
